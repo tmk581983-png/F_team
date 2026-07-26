@@ -1,0 +1,13 @@
+# 環境変数（パスワード等の秘密情報）※絶対にアップしない
+.env
+
+# macOSが自動生成するファイル
+.DS_Store
+
+# Python仮想環境（各自のPCで作るもの）
+venv/
+.venv/
+
+# Pythonの実行キャッシュ
+__pycache__/
+*.pyc
