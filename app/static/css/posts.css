@@ -97,6 +97,7 @@ body {
 .post-actions {
   display: flex;
   gap: 8px;
+  align-items: center;
 }
 
 .action {
@@ -107,6 +108,17 @@ body {
   font-size: 12px;
   color: #5f7178;
   cursor: pointer;
+  font-family: inherit;
+}
+
+/* 削除ボタン（自分の投稿にだけ表示される） */
+.action-delete {
+  border-color: #e3bdb4;
+  color: #b5442f;
+}
+
+.action-delete:hover {
+  background: #faede9;
 }
 
 /* 返信 */
