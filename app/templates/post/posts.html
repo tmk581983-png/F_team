@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}掲示板{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/posts.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="page">
+
+  {# ------- ルームID選択プルダウン ------- #}
+  <form class="room-select" action="{{ url_for('post.posts_view') }}" method="get">
+    <label for="room_id">チャレンジルーム</label>
+    <select id="room_id" name="room_id" onchange="this.form.submit()">
+      {% for room in rooms %}
+      <option value="{{ room.id }}" {% if room.id== room_id %}selected{% endif %}>
+        {{ room.id }}（{{ room.name }}）
+      </option>
+      {% endfor %}
+    </select>
+  </form>
+
+  {# ------- 掲示板（投稿一覧） ------- #}
+  <section class="board">
+    <h1 class="board-title">掲示板</h1>
+    <p class="board-room">{{ room_name }}</p>
+
+    {% if posts %}
+    {% for post in posts %}
+    <article class="post">
+      <div class="post-head">
+        <span class="post-user">{{ post.user_name }}</span>
+        <span class="post-time">{{ post.created_at }}</span>
+      </div>
+
+      <p class="post-body">{{ post.content }}</p>
+
+      <div class="post-actions">
+        <button type="button" class="action">リアクション {{ post.reactions }}</button>
+        <button type="button" class="action">返信 {{ post.replies|length }}</button>
+      </div>
+
+      {% if post.replies %}
+      <div class="replies">
+        {% for reply in post.replies %}
+        <p class="reply">{{ reply }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </article>
+    {% endfor %}
+
+    {% else %}
+    <p class="empty">このルームにはまだ投稿がありません。</p>
+    {% endif %}
+  </section>
+
+  {# ------- 投稿フォーム ------- #}
+  <section class="new-post">
+    <form action="{{ url_for('post.create_post') }}" method="post">
+      {# いまどのルームを見ているかを、一緒に送ります #}
+      <input type="hidden" name="room_id" value="{{ room_id }}">
+
+      <textarea name="content" rows="3" placeholder="今日のチャレンジを書いてみましょう"></textarea>
+
+      <div class="new-post-footer">
+        <button type="submit" class="btn-post">投稿</button>
+      </div>
+    </form>
+  </section>
+
+</div>
+{% endblock %}
