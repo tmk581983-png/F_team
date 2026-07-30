@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" >
+  <title>チャレンジルーム</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/challenge.css')}}">
+</head>
+<body>
+  <header>
+    <p>チャレンジルーム</p>
+  </header>
+    <main>
+      <div class="challenge_header">
+        <h2>{{ room_name }}</h2>
+        <a href="{{ url_for('room_select')}}" class="back-btn">戻る</a>
+      </div>
+      <div class="set-timebox">
+        <div class="set-time" id="setTime">00:00<span>/10:00</span></div>
+        <button class="time-btn" id="start">▶️ 開始！</button>  
+        
+      </div>
+
+      <div class="result-box">
+        <a href="{{ url_for('result')}}" class="result_report disabled" id="resultReport" >達成報告を投稿</a>
+      </div>
+      <p class="memo">※学習10分経過後、有効</p>
+    </main>
+
+<script src="{{ url_for('static', filename='challenge.js')}}"></script>    
+</body>
+
+
+</html>
