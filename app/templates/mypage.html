@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title%}マイページ | 三日坊主を極める{% endblock%}
+
+{% block page_css  %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/mypage.css') }}">
+{% endblock  %}
+
+{% block content %}
+  <div class="mypage">
+    <a class="logout-link" href="">ログアウト</a>
+
+    <h2 class="page-title">マイページ</h2>
+
+    <div class="mypage-main">
+      <div class="card">
+        <div class="profile">
+          <div class="profile-image">
+            <img src="{{ profile_image_path }}" alt="プロフィール画像">
+          </div>
+
+          <div class="profile-detail">
+            <div class="profile-top">
+              <p>{{ name }}</p>
+            </div>
+
+            <div class="profile-bottom">
+              <p>現在のステップ数：{{ current_step }}</p>
+              <p>累計達成回数：{{ achievement_count }}回</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="section-title">登録中のチャレンジルーム（上限は1部屋まで）</h3>
+      
+      <div class="card">
+        <div class="room-header">
+          <h4>{{ room_name }}</h4>
+          <p class="participant-count">現在の参加人数：{{ member_count }}人</p>
+        </div>
+
+        <button class="enter-room-button">入室</button>
+      </div>
+      
+      <div class="find-room-container">
+        <button class="find-room-button">ルームを探す</button>
+        <p class="notion">※ルーム未登録の場合はルーム一覧へ強制遷移し、登録するまで先へ進めません</p>
+      </div>
+    </div>
+  </div>
+{% endblock  %}
