@@ -1,0 +1,121 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing: border-box;
+}
+
+.disabled{
+  pointer-events: none;
+  opacity: 0.5;
+  cursor:not-allowed;
+}
+
+main{
+  width: 100%;
+  max-width: 500px;
+  margin:0 auto;
+  padding: 40px 20px;
+}
+
+body{
+  border:5px solid black;
+  border-radius: 20px;
+  width: 500px;
+  height: 600px;
+  margin: 40px auto;
+  background-color: rgba(235, 234, 237, 0.807);
+}
+
+header{
+  text-align: left;
+  width: 100%;
+  max-width: 300px;
+  margin:0 auto;
+  margin-top:15px;
+  font-size:large;
+}
+
+.challenge_header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 300px;
+  margin:0 auto;
+  font-size: small;
+}
+
+h2{
+  font-family: sans-serif;
+}
+
+.back-btn{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height:24px;
+  background-color: rgba(145, 145, 153, 0.519);
+  color: rgb(22, 19, 19);
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: small;
+}
+
+.set-time{
+  display: flex;
+  border:2px solid rgb(45, 200, 231);
+  color: rgb(45, 200, 231);
+  border-radius: 5px;
+  width: 300px;
+  height: 36px;
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top:16px;
+}
+
+.time-btn{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 5px;
+  width: 300px;
+  height: 36px;
+  background-color: rgb(5, 89, 5);
+  color: white;
+}
+
+button:hover {
+  cursor:pointer;
+}
+
+.set-timebox{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 200px;
+}
+
+.result-box{
+  display: flex;
+  justify-content: center;
+}
+
+.result_report{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 5px;
+  width: 300px;
+  height: 36px;
+  background-color: rgb(150, 234, 31);
+  color: black;
+  text-decoration: none;
+  margin-top: 10px;
+}
+
+.memo{
+  text-align: center;
+}
