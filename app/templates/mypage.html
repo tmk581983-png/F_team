@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block title%}マイページ | 三日坊主を極める{% endblock%}
+{% block title %}マイページ | 三日坊主を極める{% endblock %}
 
-{% block page_css  %}
+{% block page_css %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/mypage.css') }}">
-{% endblock  %}
+{% endblock %}
 
 {% block content %}
   <div class="mypage">
-    <a class="logout-link" href="">ログアウト</a>
+    <a class="logout-link" href="{{ url_for('login.login') }}">ログアウト</a>
 
     <h2 class="page-title">マイページ</h2>
 
@@ -40,13 +40,13 @@
           <p class="participant-count">現在の参加人数：{{ member_count }}人</p>
         </div>
 
-        <button class="enter-room-button">入室</button>
+        <a class="enter-room-button" href="">入室</a>
       </div>
       
       <div class="find-room-container">
-        <button class="find-room-button">ルームを探す</button>
+        <a class="find-room-button" href="{{ url_for('room_list.index') }}">ルームを探す</a>
         <p class="notion">※ルーム未登録の場合はルーム一覧へ強制遷移し、登録するまで先へ進めません</p>
       </div>
     </div>
   </div>
-{% endblock  %}
+{% endblock %}
