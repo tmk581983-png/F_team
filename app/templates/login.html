@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>ログイン</title>
+
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/login_style.css') }}"
+  >
+</head> 
+
+<body>
+
+  <main class="auth-container">
+    <section class="auth-card">
+      <h1>ログイン</h1>
+
+      <form method="POST">
+
+        <div class="form-group">
+          <label for="user_id">ID</label>
+
+          <input
+            type="text"
+            id="user_id"
+            name="user_id"
+            placeholder="IDを入力"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password">パスワード</label>
+
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="パスワードを入力"
+          >
+        </div>
+
+        <button type="submit" class="main-button">
+          ログイン
+        </button>
+
+      </form>
+
+      <p class="page-link">
+        <a href="#">新規登録はこちら</a>
+      </p>
+
+    </section>
+  </main>
+
+</body>
+
+</html>
