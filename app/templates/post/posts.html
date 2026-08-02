@@ -1,19 +1,10 @@
 {# ============================================================
-   掲示板ページ（投稿画面）
-
-   このファイルは HTML ですが、二重の波かっこなどを使って
-   Python から渡された値を差し込めます（Jinja2 という仕組み）。
-
+   投稿画面
      {{ 値 }}   … 値をその場に表示する
      {% 命令 %} … くり返しや条件分岐などの命令
-     波かっこ＋シャープで囲むと、画面に出ないコメントになります
-     （いま読んでいるこの文章も、そのコメントです）
-
-   注意：コメントの中に、コメントを閉じる記号を書いてはいけません。
-   そこでコメントが終わったと判断され、続きが画面に出てしまいます。
 
    routes/post.py の render_template() で渡された
-   rooms / room_id / room_name / posts が使えます。
+   rooms / room_id / room_name / posts が使える。
    ============================================================ #}
 
 {# base.html（共通の外枠）を土台にする、という宣言 #}
@@ -27,16 +18,14 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/posts.css') }}">
 {% endblock %}
 
-
 {# ここから下が、ページの中身 #}
 {% block content %}
 <div class="page">
 
   {# ============================================================
-     ① ルームID選択プルダウン
-
-     ルームを選ぶと、そのルームの掲示板に切り替わります。
-     method="get" なので、選んだ値がアドレスに付きます。
+     ルームID選択プルダウン
+     ルームを選ぶと、そのルームの掲示板に切り替わる
+     method="get" なので、選んだ値がアドレスに付く
        → /posts?room_id=room_02
      ============================================================ #}
   <form class="room-select" action="{{ url_for('post.posts_view') }}" method="get">
@@ -46,7 +35,7 @@
        「選択が変わったら、ボタンを押さなくても送信する」という指示 #}
     <select id="room_id" name="room_id" onchange="this.form.submit()">
 
-      {# rooms（ルーム一覧）を1つずつ取り出して、選択肢を作る #}
+      {# rooms（ルーム一覧）を1つずつ取り出して、選択肢を作成 #}
       {% for room in rooms %}
       <option value="{{ room.id }}" {% if room.id== room_id %}selected{% endif %}>
         {{ room.id }}（{{ room.name }}）
@@ -58,12 +47,12 @@
 
 
   {# ============================================================
-     ② 掲示板（投稿一覧）
+     投稿画面
      ============================================================ #}
   <section class="board">
     <h1 class="board-title">チャレンジルーム名</h1>
 
-    {# いま見ているルームの名前を表示 #}
+    {# いま見ているルーム名を表示 #}
     <p class="board-room">{{ room_name }}</p>
 
     {# 投稿が1件でもあるかどうかで、表示を切り替える #}
@@ -85,20 +74,20 @@
       {# --- ボタンの並び --- #}
       <div class="post-actions">
 
-        {# リアクションと返信は、いまは表示のみ（押しても何も起きません） #}
+        {# リアクションと返信は、いまは表示のみ（押しても何も起きない） #}
         <button type="button" class="action">リアクション {{ post.reactions }}</button>
         <button type="button" class="action">返信 {{ post.replies|length }}</button>
 
         {# ★ 自分の投稿のときだけ、削除ボタンを表示する ★
-             post.is_mine が True のものだけが対象です #}
+             post.is_mine が True のものだけ対象 #}
         {% if post.is_mine %}
         <form action="{{ url_for('post.delete_post', post_id=post.id) }}" method="post">
 
-          {# どのルームの投稿かを、一緒に送る（画面に出ない項目） #}
+          {# どのルームの投稿かを、一緒に送る #}
           <input type="hidden" name="room_id" value="{{ room_id }}">
 
           {# onclick の confirm は「本当に消しますか？」の確認ダイアログ。
-             キャンセルを押すと削除されません #}
+             キャンセルを押すと削除されない #}
           <button type="submit" class="action action-delete" onclick="return confirm('この投稿を削除しますか？');">
             削除
           </button>
@@ -119,7 +108,7 @@
     </article>
     {% endfor %}
 
-    {# 投稿が1件も無かったときに表示する文 #}
+    {# 投稿が1件も無かったときに表示する #}
     {% else %}
     <p class="empty">このルームにはまだ投稿がありません。</p>
     {% endif %}
@@ -128,19 +117,18 @@
 
 
   {# ============================================================
-     ③ 投稿フォーム
-
-     method="post" で、routes/post.py の create_post() に送られます。
+     投稿フォーム
+     method="post" で、routes/post.py の create_post() に送られる。
      ============================================================ #}
   <section class="new-post">
     <form action="{{ url_for('post.create_post') }}" method="post">
 
-      {# いまどのルームを見ているかを、一緒に送る。
-         type="hidden" なので、画面には表示されません #}
+      {# どのルームを見ているかを、一緒に送る。
+         type="hidden" なので、画面には表示されない #}
       <input type="hidden" name="room_id" value="{{ room_id }}">
 
       {# name="content" が、Python 側で request.form.get("content") として
-         受け取るときの名前になります #}
+         受け取るときの名前。投稿テンプレートの役目 #}
       <textarea name="content" rows="3" placeholder="ステップ数や勉強時間、学んだ内容などを一言書いてみましょう"></textarea>
 
       <div class="new-post-footer">
