@@ -1,0 +1,78 @@
+/* ブラウザの余白をリセット　*/
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ページ全体　*/
+body {
+    font-family: sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* カード　*/
+.auth-card {
+    background-color: white;
+    padding: 40px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.auth-card input{
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+
+}
+
+/*　登録ボタン*/
+.main-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #2b8f67;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/*マウスを乗せた時*/
+.main-button:hover {
+    background-color: #247a58;
+}
+
+/* ログイン画面へのリンク*/
+.page-link {
+    margin-top: 16px;
+    text-align: center;
+}
+
+.page-link a {
+    text-decoration: none;
+    color: #5c7fa6;
+}
+
+.page-link a:hover {
+    text-decoration: underline;
+}
