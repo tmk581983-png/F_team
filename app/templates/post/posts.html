@@ -20,7 +20,7 @@
 {% extends "base.html" %}
 
 {# ブラウザのタブに出るページ名 #}
-{% block title %}掲示板{% endblock %}
+{% block title %}投稿画面{% endblock %}
 
 {# このページだけで使う CSS を読み込む #}
 {% block page_css %}
@@ -61,7 +61,7 @@
      ② 掲示板（投稿一覧）
      ============================================================ #}
   <section class="board">
-    <h1 class="board-title">掲示板</h1>
+    <h1 class="board-title">チャレンジルーム名</h1>
 
     {# いま見ているルームの名前を表示 #}
     <p class="board-room">{{ room_name }}</p>
@@ -141,7 +141,7 @@
 
       {# name="content" が、Python 側で request.form.get("content") として
          受け取るときの名前になります #}
-      <textarea name="content" rows="3" placeholder="今日のチャレンジを書いてみましょう"></textarea>
+      <textarea name="content" rows="3" placeholder="ステップ数や勉強時間、学んだ内容などを一言書いてみましょう"></textarea>
 
       <div class="new-post-footer">
         <button type="submit" class="btn-post">投稿</button>

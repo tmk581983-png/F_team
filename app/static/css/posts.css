@@ -1,23 +1,13 @@
-/* 投稿画面（掲示板）のデザイン */
+/* ============================================================
+   posts.css … 投稿画面（掲示板）だけのデザイン
 
-* {
-  box-sizing: border-box;
-}
+   全画面共通の部分（body、.page、ヘッダー、フッター）は
+   base.css に移しました。ここには投稿画面専用のものだけを書きます。
 
-body {
-  margin: 0;
-  padding: 0;
-  background: #f2f5f4;
-  font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
-  color: #12262e;
-}
-
-/* 画面全体の枠 */
-.page {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 16px 16px 40px;
-}
+   クラス名は .post- / .room- / .new-post- のように
+   この画面だとわかる名前を付けています。
+   （名前がかぶると、他の画面のデザインが壊れるため）
+   ============================================================ */
 
 /* ------- ルーム選択 ------- */
 .room-select {
