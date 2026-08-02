@@ -1,60 +1,15 @@
-{# ============================================================
-   base.html … すべての画面の「土台」になるファイル
-
-   【役割】
-   どの画面にも共通して必要なもの（文字コードの指定、共通CSS、
-   ヘッダー、フッターなど）を、ここに1回だけ書いておきます。
-
-   各画面のHTML（login.html / posts.html など）は、
-   このファイルを土台にして、中身だけを書きます。
-
-   【block（ブロック）とは】
-   「ここは各画面ごとに差し替えてください」という穴のことです。
-   このファイルには3つの穴があります。
-
-     title     … ブラウザのタブに出る名前
-     page_css  … その画面だけで使うCSS
-     content   … 画面の中身（ここがメイン）
-
-   【変更するときの注意】
-   このファイルを直すと、全画面に影響します。
-   触る前に必ずチームに一言お願いします。
-   ============================================================ #}
-
 <!DOCTYPE html>
 <html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}三日坊主を極める{% endblock %}</title>
 
-  {# 穴①：タブに出る名前。各画面で差し替えます #}
-  <title>{% block title %}チャレンジアプリ{% endblock %}</title>
+    {% block page_css %}{% endblock %}
+  </head>
 
-  {# 全画面で共通のデザイン。ここは各画面で書く必要がありません #}
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-
-  {# 穴②：その画面だけで使うCSS。各画面で差し替えます #}
-  {% block page_css %}{% endblock %}
-</head>
-
-<body>
-
-  {# ---- 全画面共通のヘッダー ---- #}
-  <header class="app-header">
-    <p class="app-title">チャレンジアプリ</p>
-  </header>
-
-  {# ---- 穴③：ここに各画面の中身が入ります ---- #}
-  <main class="app-main">
+  <body>
     {% block content %}{% endblock %}
-  </main>
-
-  {# ---- 全画面共通のフッター ---- #}
-  <footer class="app-footer">
-    <p>F_team</p>
-  </footer>
-
-</body>
-
+  </body>
 </html>
