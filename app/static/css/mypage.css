@@ -4,10 +4,6 @@
   box-sizing: border-box;
 }
 
-li {
-  list-style: none;
-}
-
 a {
   text-decoration: none;
 }
@@ -19,7 +15,7 @@ body {
 .mypage {
   width: 100%;
   max-width: 800px;
-  margin: 80px auto;
+  margin: 180px auto;
   padding: 0 12px;
 }
 
@@ -28,8 +24,8 @@ body {
   text-align: right;
   font-weight: 500;
   color: rgb(79, 86, 106);
-  margin-top: 24px;
-  margin-right: 24px;
+  margin-right: 32px;
+  transform: translateY(24px);
 }
 
 .logout-link:hover {
@@ -39,8 +35,8 @@ body {
 
 .page-title {
   font-size: 32px;
-  margin-left: 20px;
-  margin-bottom: 32px;
+  margin-left: 24px;
+  margin-bottom: 40px;
 }
 
 .section-title {
@@ -63,11 +59,9 @@ body {
 }
 
 .profile-image {
-  width: 10%;
-  height: 10%;
-  background-image: url("/static/images/default_user.png");
-  background-size: cover;
-  background-position: center;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
   border-radius: 50%;
 }
 
@@ -82,9 +76,13 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex: 1;
 }
 
 .profile-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: 20px;
   color: rgb(37, 36, 36);
 }
@@ -94,59 +92,30 @@ body {
   color: rgb(71, 70, 70);
 }
 
-.room-header {
+.room-detail {
   display: flex;
   justify-content: space-between;
   font-size: 20px;
   align-items: center;
 }
 
+.enter-room-container {
+  margin: 32px 20px 20px 20px;
+}
+
 .enter-room-button {
-  display: block;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   height: 48px;
-  color: black;
+  color: white;
   font-size: 16px;
   font-weight: bold;
-  background-color: rgb(145, 197, 239);
-  border: 1px solid black;
+  background-color: rgb(43, 143, 103);
   border-radius: 8px;
-  margin-top: 8px;
-  padding: 12px;
 }
 
 .enter-room-button:hover {
-  background-color: rgb(80, 177, 238);
-}
-
-.find-room-container {
-  margin: 20px;
-  padding: 0;
-}
-
-.find-room-button {
-  display: block;
-  text-align: center;
-  width: 100%;
-  color: black;
-  font-size: 16px;
-  font-weight: bold;
-  background-color: rgb(209, 221, 221);
-  border: 1px solid black;
-  border-radius: 8px;
-  margin-top: 12px;
-  padding: 12px;
-}
-
-.find-room-button:hover {
-  background-color: rgb(225, 208, 129);
-}
-
-.notion {
-  display: flex;
-  justify-content: center;
-  font-size: 20px;
-  color: rgb(209, 28, 28);
-  margin-top: 12px;
+  background-color: rgb(36, 122, 88);
 }
