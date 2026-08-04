@@ -83,12 +83,13 @@ h2{
   border-radius: 5px;
   width: 300px;
   height: 36px;
-  background-color: rgb(5, 89, 5);
+  background-color: #2b8f67;
   color: white;
 }
 
 button:hover {
   cursor:pointer;
+  background-color: #247a58;
 }
 
 .set-timebox{
