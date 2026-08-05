@@ -6,7 +6,7 @@ DB接続はまだしないので、ダミーデータ（ ROOMS と POSTS）を�
 後ほどmodels/post.py（DB操作）に置きかえ予定。
 
 【処理の流れ】
-ブラウザ → 本ファイル →（データを渡す）→ templates/post/posts.html → ブラウザに表示
+ブラウザ → 本ファイル →（データを渡す）→ templates/posts.html → ブラウザに表示
 
 """
 
@@ -34,7 +34,7 @@ post_bp = Blueprint("post", __name__)
 ROOMS = [
     {"id": "room_01", "name": "目指せ！150ステップクリア！"},
     {"id": "room_02", "name": "ネットワークわけわからん"},
-    {"id": "room_03", "name": "Linuxコマンド乱れ打ち"},
+    {"id": "room_03", "name": "今から日報書きます"},
     {"id": "room_04", "name": "言語化してみる"},
     {"id": "room_05", "name": "一休み一休み"},
 ]
@@ -99,9 +99,9 @@ POSTS = {
         {
             "id": 5,
             "user_name": "田中四郎",
-            "content": "LpiC合格したいので、今日もコマンド打ちまくりました！",
+            "content": "日報提出でしました！あと1分のところでギリギリセーフ！",
             "created_at": "2026-07-26 22:15",
-            "replies": ["参考にしているサイトはありますか？"],
+            "replies": ["よかったですね！私は間に合いませんでした。涙"],
             "reactions": 1,
             "is_mine": False,
         },
@@ -173,7 +173,7 @@ def posts_view():
     # ここで渡した項目（rooms、room_id など）が、
     # posts.html の中で {{ rooms }} のように使えるようになる。
     return render_template(
-        "post/posts.html",
+        "posts.html",
         rooms=ROOMS,                        # プルダウンのルーム一覧
         room_id=room_id,                    # 選択されているルームID
         room_name=find_room_name(room_id),  # 選択されているルーム名
