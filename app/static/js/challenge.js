@@ -1,6 +1,7 @@
 // タイマーと開始ボタンに使う要素を指定
 const setTime = document.getElementById('setTime');
 const start = document.getElementById("start");
+const backbutton = document.getElementById("back-button");
 
 let startTime;
 // クリックした時の動作の設定
@@ -9,6 +10,8 @@ start.addEventListener('click',() => {
   console.log(startTime);
   console.log(new Date(startTime))
   countUp();
+  backbutton.style.pointerEvents = "none";
+  start.style.pointerEvents = "none";
 })
 
 // カウントアップタイマーの設定
