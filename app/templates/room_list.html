@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}ルーム一覧 | 三日坊主を極める{% endblock %}
+
+{% block page_css %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/room_list.css') }}">
+{% endblock %}
+
+{% block content %}
+  <div class="room-list">
+    <h2 class="page-title">チャレンジルーム一覧</h2>
+
+    <div class="room-list-main">
+      <form method="POST" action="{{ url_for('room_list.register') }}">
+        <div class="room-selection">
+          {% for room in rooms %}
+            <div class="card">
+              {# 選択したルームIDをPOSTで送るため、valueにはroom.idを設定 #}
+              <input
+                type="radio"
+                id="{{ room.id }}"
+                name="room_id"
+                value="{{ room.id }}"
+                required
+              >
+              <label for="{{ room.id }}" class="room-card">
+                <h4>{{ room.name }}</h4>
+                <p class="participant-count">参加中： {{ room.member_count }}人</p>
+              </label>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="enter-room-container">
+          <button type="submit" class="enter-room-button">このルームに参加する</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock  %}
