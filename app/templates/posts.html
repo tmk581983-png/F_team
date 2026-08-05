@@ -1,0 +1,142 @@
+{# ============================================================
+   投稿画面
+     {{ 値 }}   … 値をその場に表示する
+     {% 命令 %} … くり返しや条件分岐などの命令
+
+   routes/post.py の render_template() で渡された
+   rooms / room_id / room_name / posts が使える。
+   ============================================================ #}
+
+{# base.html（共通の外枠）を土台にする、という宣言 #}
+{% extends "base.html" %}
+
+{# ブラウザのタブに出るページ名 #}
+{% block title %}投稿画面{% endblock %}
+
+{# このページだけで使う CSS を読み込む #}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/posts.css') }}">
+{% endblock %}
+
+{# ここから下が、ページの中身 #}
+{% block content %}
+<div class="post-page">
+
+  {# ============================================================
+     ルームID選択プルダウン
+     ルームを選ぶと、そのルームの掲示板に切り替わる
+     method="get" なので、選んだ値がアドレスに付く
+       → /posts?room_id=room_02
+     ============================================================ #}
+  <form class="room-select" action="{{ url_for('post.posts_view') }}" method="get">
+    <label for="room_id">チャレンジルーム</label>
+
+    {# onchange="this.form.submit()" は
+       「選択が変わったら、ボタンを押さなくても送信する」という指示 #}
+    <select id="room_id" name="room_id" onchange="this.form.submit()">
+
+      {# rooms（ルーム一覧）を1つずつ取り出して、選択肢を作成 #}
+      {% for room in rooms %}
+      <option value="{{ room.id }}" {% if room.id== room_id %}selected{% endif %}>
+        {{ room.id }}（{{ room.name }}）
+      </option>
+      {% endfor %}
+
+    </select>
+  </form>
+
+
+  {# ============================================================
+     投稿画面
+     ============================================================ #}
+  <section class="board">
+    <h1 class="board-title">チャレンジルーム名</h1>
+
+    {# いま見ているルーム名を表示 #}
+    <p class="board-room">{{ room_name }}</p>
+
+    {# 投稿が1件でもあるかどうかで、表示を切り替える #}
+    {% if posts %}
+
+    {# posts（投稿リスト）を1件ずつ取り出して、順番に並べる #}
+    {% for post in posts %}
+    <article class="post">
+
+      {# --- 投稿者名と日時 --- #}
+      <div class="post-head">
+        <span class="post-user">{{ post.user_name }}</span>
+        <span class="post-time">{{ post.created_at }}</span>
+      </div>
+
+      {# --- 投稿の本文 --- #}
+      <p class="post-body">{{ post.content }}</p>
+
+      {# --- ボタンの並び --- #}
+      <div class="post-actions">
+
+        {# リアクションと返信は、いまは表示のみ（押しても何も起きない） #}
+        <button type="button" class="action">リアクション {{ post.reactions }}</button>
+        <button type="button" class="action">返信 {{ post.replies|length }}</button>
+
+        {# ★ 自分の投稿のときだけ、削除ボタンを表示する ★
+             post.is_mine が True のものだけ対象 #}
+        {% if post.is_mine %}
+        <form action="{{ url_for('post.delete_post', post_id=post.id) }}" method="post">
+
+          {# どのルームの投稿かを、一緒に送る #}
+          <input type="hidden" name="room_id" value="{{ room_id }}">
+
+          {# onclick の confirm は「本当に消しますか？」の確認ダイアログ。
+             キャンセルを押すと削除されない #}
+          <button type="submit" class="action action-delete" onclick="return confirm('この投稿を削除しますか？');">
+            削除
+          </button>
+        </form>
+        {% endif %}
+
+      </div>
+
+      {# --- 返信の一覧（返信があるときだけ表示） --- #}
+      {% if post.replies %}
+      <div class="replies">
+        {% for reply in post.replies %}
+        <p class="reply">{{ reply }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+    </article>
+    {% endfor %}
+
+    {# 投稿が1件も無かったときに表示する #}
+    {% else %}
+    <p class="empty">このルームにはまだ投稿がありません。</p>
+    {% endif %}
+
+  </section>
+
+
+  {# ============================================================
+     投稿フォーム
+     method="post" で、routes/post.py の create_post() に送られる。
+     ============================================================ #}
+  <section class="new-post">
+    <form action="{{ url_for('post.create_post') }}" method="post">
+
+      {# どのルームを見ているかを、一緒に送る。
+         type="hidden" なので、画面には表示されない #}
+      <input type="hidden" name="room_id" value="{{ room_id }}">
+
+      {# name="content" が、Python 側で request.form.get("content") として
+         受け取るときの名前。投稿テンプレートの役目 #}
+      <textarea name="content" rows="3" placeholder="ステップ数や勉強時間、学んだ内容などを一言書いてみましょう"></textarea>
+
+      <div class="new-post-footer">
+        <button type="submit" class="btn-post">投稿</button>
+      </div>
+
+    </form>
+  </section>
+
+</div>
+{% endblock %}
