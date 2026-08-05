@@ -39,8 +39,7 @@ def result():
 def room_select():
    return render_template("room_select.html")
 
-if __name__ == "__main__":
-    app.run(debug=True)
+
 
 
 
