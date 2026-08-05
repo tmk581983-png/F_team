@@ -8,7 +8,7 @@ def index():
 
     # TODO: user_idをもとに参加中のルーム情報をDBから取得する
     joined_room = {
-        "id": "room_01",
+        "id": "1",
         "name": "目指せ！150ステップクリア！",
         "member_count": 10,
     }
