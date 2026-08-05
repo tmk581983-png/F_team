@@ -14,7 +14,7 @@
     <main>
       <div class="challenge_header">
         <h2>{{ room_name }}</h2>
-        <a href="{{ url_for('challenge.room_select')}}" class="back-btn" id="back-button">戻る</a>
+        <a href="{{ url_for('room_list.index')}}" class="back-btn" id="back-button">戻る</a>
       </div>
       <div class="set-timebox">
         <div class="set-time" id="setTime">00:00<span>/10:00</span></div>
@@ -23,12 +23,12 @@
       </div>
 
       <div class="result-box">
-        <a href="{{ url_for('result')}}" class="result_report disabled" id="resultReport" >達成報告を投稿</a>
+        <a href="{{ url_for('post.posts_view')}}" class="result_report disabled" id="resultReport" >達成報告を投稿</a>
       </div>
       <p class="memo">※学習10分経過後、有効</p>
     </main>
 
-<script src="{{ url_for('static', filename='challenge.js')}}"></script>    
+<script src="{{ url_for('static', filename='js/challenge.js')}}"></script>
 </body>
 
 
