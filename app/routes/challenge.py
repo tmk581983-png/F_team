@@ -31,11 +31,11 @@ def room(room_id):
     else :
        return "Room not found", 404
 
-@challenge_bp("/result")
+@challenge_bp.route("/result")
 def result():
    return render_template("result.html")
 
-@challenge_bp("/room_select")
+@challenge_bp.route("/room_select")
 def room_select():
    return render_template("room_select.html")
 
