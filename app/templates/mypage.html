@@ -32,17 +32,17 @@
         </div>
       </div>
 
-      <h3 class="section-title">登録中のチャレンジルーム（上限は1部屋まで）</h3>
+      <h3 class="section-title">参加中のチャレンジルーム（上限は1つまで）</h3>
       
       <div class="card">
         <div class="room-detail">
           <h4>{{ joined_room.name }}</h4>
-          <p class="participant-count">現在の参加人数： {{ joined_room.member_count }}人</p>
+          <p class="participant-count">参加中： {{ joined_room.member_count }}人</p>
         </div>
       </div>
       
       <div class="enter-room-container">
-        <a class="enter-room-button" href="{{ url_for('post.posts_view', room_id=joined_room.id) }}">【{{ joined_room.name }}】ルームに入室</a>
+        <a class="enter-room-button" href="{{ url_for('challenge.room', room_id=joined_room.id) }}">【{{ joined_room.name }}】ルームに入室</a>
       </div>
     </div>
   </div>
