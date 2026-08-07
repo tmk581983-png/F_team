@@ -1,21 +1,15 @@
-<!DOCTYPE html>
-<html lang="ja">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>新規登録</title>
+{% block title %}新規登録 | 三日坊主を極める{% endblock %}
 
-    <!-- 新規登録画面専用のCSSを読み込む　-->
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static' , filename='css/signup_style.css')}}"
-    >
+{% block page_css %}
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/signup_style.css') }}"
+  >
+{% endblock %}
 
-</head>
-<body>
-
+{% block content %}
     <main class="auth-container">
         <section class="auth-card">
 
@@ -65,13 +59,11 @@
 </form>
 
 <p class="page-link">
-    <a href="{{ url_for('login.login')}}">
+    <a href="{{ url_for('login.login') }}">
         ログインはこちら
     </a>
 </p>
 
         </section>
     </main>
-</body>
-
-</html>
+{% endblock %}

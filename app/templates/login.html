@@ -1,19 +1,15 @@
-<!DOCTYPE html>
-<html lang="ja">
+{% extends "base.html" %}
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% block title %}ログイン | 三日坊主を極める{% endblock %}
 
-  <title>ログイン</title>
-
-  <link
+{% block page_css %}
+ <link
     rel="stylesheet"
     href="{{ url_for('static', filename='css/login_style.css') }}"
-  >
-</head> 
+    >
+{% endblock %}
+{% block content %}
 
-<body>
 
   <main class="auth-container">
     <section class="auth-card">
@@ -58,6 +54,5 @@
     </section>
   </main>
 
-</body>
 
-</html>
+{% endblock %}
