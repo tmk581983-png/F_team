@@ -1,12 +1,8 @@
 /* ============================================================
-   posts.css … 投稿画面だけのデザイン
-
-   base.html（共通の外枠）は共通CSSを読み込まない作りなので、
-   この画面で必要なものは、すべてこのファイルに書きます。
-
+   posts.css … 投稿画面のデザイン
    クラス名は .post- / .room- / .new-post- のように
    この画面だとわかる名前を付けています。
-   （他の画面と名前がかぶると、Gitは警告せずに見た目だけ壊れるため）
+   （他の画面と名前がかぶると、Gitが警告せずに見た目が壊れるため）
    ============================================================ */
 
 /* ------- この画面の土台 ------- */
@@ -27,6 +23,29 @@ body {
   max-width: 640px;
   margin: 0 auto;
   padding: 16px 16px 40px;
+}
+
+/* ------- マイページへ戻る ------- */
+.post-nav {
+  margin-bottom: 12px;
+}
+
+.back-link {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #ffffff;
+  border: 1px solid #cdd8d8;
+  border-radius: 999px;
+  color: #12262e;
+  font-size: 13px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  background: #eef3f2;
+  border-color: #028090;
+  color: #028090;
 }
 
 /* ------- ルーム選択 ------- */
@@ -54,7 +73,7 @@ body {
   background: #ffffff;
 }
 
-/* ------- 掲示板 ------- */
+/* ------- 投稿画面 ------- */
 .board {
   background: #ffffff;
   border-radius: 10px;
@@ -175,7 +194,7 @@ body {
 }
 
 .btn-post {
-  background: #028090;
+  background: #2b8f67;
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -186,5 +205,5 @@ body {
 }
 
 .btn-post:hover {
-  background: #016b78;
+  background: #247a58;
 }
