@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, redirect,  url_for
 
 #新規登録画面用のBlueprint
 signup_bp = Blueprint(
@@ -25,6 +25,9 @@ def index():
         print(f"User Name: {user_name}")
         print(f"Password: {password}")
         print("新規登録フォームが送信されました")
+
+    #登録ボタンを押したらマイページへ移動する
+        return redirect(url_for("mypage.index"))
 
     #GETでもPOSTでも、最後に新規登録画面を表示する
     return render_template("signup.html")
