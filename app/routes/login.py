@@ -12,6 +12,11 @@ def login():
         login_id = request.form["user_id"]
         password = request.form["password"]
 
+        #未入力の項目がないか確認する
+        if not login_id or not password:
+            return render_template("login.html",error="IDとパスワードを入力してください")
+        
+
         #受け取れた値をDockerのログで確認する
         print(f"Login ID: {login_id}")
         print(f"Password: {password}")
