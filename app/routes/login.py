@@ -9,7 +9,7 @@ def login():
     if request.method == "POST":
 
         #HTMLのname属性を使って入力値を受け取る
-        login_id = request.form["user_id"]
+        login_id = request.form["user_id"].strip()
         password = request.form["password"]
 
         #未入力の項目がないか確認する
