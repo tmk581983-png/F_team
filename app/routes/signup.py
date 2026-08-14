@@ -16,8 +16,8 @@ def index():
     if request.method == "POST":
 
         #HTMLのname属性を使って入力値を受け取る
-        login_id = request.form["login_id"]
-        user_name = request.form["user_name"]
+        login_id = request.form["login_id"].strip()
+        user_name = request.form["user_name"].strip()
         password = request.form["password"]
 
         #未入力の項目がないか確認する
