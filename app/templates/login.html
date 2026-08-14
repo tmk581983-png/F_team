@@ -14,6 +14,9 @@
   <main class="auth-container">
     <section class="auth-card">
       <h1>3日坊主を極める</h1>
+      {% if error %}
+        <p>{{ error }}</p>
+      {% endif %} 
 
       <form method="POST">
 
