@@ -15,6 +15,11 @@
 
             <h1>新規登録</h1>
 
+            {% if error %}
+             <p>{{ error }}</p>
+            {% endif %}
+            
+
 <form method="POST">
     <div class="form-group">
         <label for="login_id">ID</label>
