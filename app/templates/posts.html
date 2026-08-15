@@ -22,17 +22,18 @@
 {% block content %}
 <div class="post-page">
 
-  {# ============================================================
-     マイページへ戻るリンク
-
-     url_for('mypage.index') は、mypage.py の
-     　@mypage_bp.route("/") → def index()
-     が対応するアドレス（/mypage/）を組み立てます。
-
-     単に別のページを開くだけなので、フォームではなくリンク（<a>）です。
-     ============================================================ #}
+  {# マイページへ戻る #}
   <div class="post-nav">
+    {% if posted %}
+    {# 投稿ボタンを押した後押せる #}
     <a class="back-link" href="{{ url_for('mypage.index') }}">マイページへ戻る</a>
+    {% else %}
+    {# 未投稿時はグレーアウト
+       <a> ではなく <span> にすることで、href が無くなり確実に押せなくなる。
+       （<a> のまま色だけ薄くしても、クリックはできてしまうため） #}
+    <span class="back-link disabled">マイページへ戻る</span>
+    <span class="back-note">投稿すると押せるようになります</span>
+    {% endif %}
   </div>
 
   {# ============================================================
@@ -48,7 +49,7 @@
        「選択が変わったら、ボタンを押さなくても送信する」という指示 #}
     <select id="room_id" name="room_id" onchange="this.form.submit()">
 
-      {# rooms（ルーム一覧）を1つずつ取り出して、選択肢を作成 #}
+      {# rooms（ルーム一覧）作成 #}
       {% for room in rooms %}
       <option value="{{ room.id }}" {% if room.id== room_id %}selected{% endif %}>
         {{ room.id }}（{{ room.name }}）
@@ -81,19 +82,53 @@
         <span class="post-time">{{ post.created_at }}</span>
       </div>
 
-      {# --- 投稿の本文 --- #}
+      {# --- 投稿の本文 ---
+           「編集」を押した投稿だけ、本文の代わりに編集フォームを出す。
+           post.id == edit_id で編集中か判定 #}
+      {% if post.is_mine and post.id == edit_id %}
+      <form class="edit-form" action="{{ url_for('post.edit_post', post_id=post.id) }}" method="post">
+        <input type="hidden" name="room_id" value="{{ room_id }}">
+        <textarea name="content" rows="3">{{ post.content }}</textarea>
+        <div class="edit-form-footer">
+          {# キャンセル：edit_id を付けずに同じページへ戻る＝フォームを閉じる #}
+          <a class="action" href="{{ url_for('post.posts_view', room_id=room_id) }}">キャンセル</a>
+          <button type="submit" class="action action-save">保存する</button>
+        </div>
+      </form>
+      {% else %}
       <p class="post-body">{{ post.content }}</p>
+      {% endif %}
 
       {# --- ボタンの並び --- #}
       <div class="post-actions">
 
-        {# リアクションと返信は、いまは表示のみ（押しても何も起きない） #}
-        <button type="button" class="action">リアクション {{ post.reactions }}</button>
+        {# ★ 自分の投稿には、リアクションできないようにする ★
+             自分の投稿 → <span> にして押せなくする
+             他人の投稿 → <button> で押せるようにする #}
+        {% if post.is_mine %}
+        <span class="action disabled">応援！ {{ post.reactions["応援"] }}</span>
+        <span class="action disabled">すごい！ {{ post.reactions["すごい"] }}</span>
+        <span class="action disabled">共感！ {{ post.reactions["共感"] }}</span>
+        {% else %}
+        <button type="button" class="action">応援！ {{ post.reactions["応援"] }}</button>
+        <button type="button" class="action">すごい！ {{ post.reactions["すごい"] }}</button>
+        <button type="button" class="action">共感！ {{ post.reactions["共感"] }}</button>
+        {% endif %}
+
+        {# 返信は、いまは表示のみ（押しても何も起きない） #}
         <button type="button" class="action">返信 {{ post.replies|length }}</button>
 
-        {# ★ 自分の投稿のときだけ、削除ボタンを表示する ★
+        {# ★ 自分の投稿のときだけ、編集ボタんと削除ボタンを表示する ★
              post.is_mine が True のものだけ対象 #}
         {% if post.is_mine %}
+
+        {# 「編集」を押すと、この投稿の edit_id を付けて再表示する。
+           すでに編集中（フォームを開いている）のときは、このボタンを隠す。 #}
+        {% if post.id != edit_id %}
+        <a class="action"
+           href="{{ url_for('post.posts_view', room_id=room_id, edit_id=post.id) }}">編集</a>
+        {% endif %}
+
         <form action="{{ url_for('post.delete_post', post_id=post.id) }}" method="post">
 
           {# どのルームの投稿かを、一緒に送る #}
