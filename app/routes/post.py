@@ -51,7 +51,8 @@ ROOMS = [
 #   content    … 投稿文
 #   created_at … 投稿した日時
 #   replies    … 投稿への返信（今は表示のみ）
-#   reactions  … リアクションの数（今は表示のみ）
+#   reactions  … リアクションの数。「応援」「すごい」「共感」の3種類を持つ
+#                （今は表示のみ。押しても数は増えない）
 #   is_mine    … 自分の投稿 = True　※自分の投稿のみ削除ボタンを表示
 #               　投稿したユーザID = ログイン中のユーザID　で判定
 POSTS = {
@@ -62,7 +63,7 @@ POSTS = {
             "content": "今日は5ステップ進めました！",
             "created_at": "2026-07-26 05:12",
             "replies": ["すごい！わたしも頑張ります", "一緒にハッカソンに出場しましょう"],
-            "reactions": 3,
+            "reactions": {"応援": 3, "すごい": 1, "共感": 0},
             "is_mine": False,
         },
         {
@@ -71,7 +72,7 @@ POSTS = {
             "content": "150ステップ達成しました！",
             "created_at": "2026-07-26 06:03",
             "replies": ["おめでとうございます"],
-            "reactions": 5,
+            "reactions": {"応援": 5, "すごい": 2, "共感": 1},
             "is_mine": False,
         },
         {
@@ -80,7 +81,7 @@ POSTS = {
             "content": "今日のステップは時間がかかるので、明日に完了させます",
             "created_at": "2026-07-26 06:30",
             "replies": [],
-            "reactions": 1,
+            "reactions": {"応援": 1, "すごい": 0, "共感": 0},
             "is_mine": True,
         },
     ],
@@ -91,7 +92,7 @@ POSTS = {
             "content": "OSI参照モデルを覚えました",
             "created_at": "2026-07-26 21:40",
             "replies": [],
-            "reactions": 2,
+            "reactions": {"応援": 2, "すごい": 1, "共感": 0},
             "is_mine": False,
         },
     ],
@@ -102,7 +103,7 @@ POSTS = {
             "content": "日報提出でしました！あと1分のところでギリギリセーフ！",
             "created_at": "2026-07-26 22:15",
             "replies": ["よかったですね！私は間に合いませんでした。涙"],
-            "reactions": 1,
+            "reactions": {"応援": 1, "すごい": 0, "共感": 2},
             "is_mine": False,
         },
     ],
@@ -169,17 +170,23 @@ def posts_view():
     # 存在しないルームIDが来ても、エラーにならず空のリストになる。
     posts = POSTS.get(room_id, [])
 
-    # --- 3. HTMLに値を渡して、画面作成 ---
-    # ここで渡した項目（rooms、room_id など）が、
-    # posts.html の中で {{ rooms }} のように使えるようになる。
+    # --- 3. 投稿ボタンを押したか判定 ---
+    # 「posted=1」で、マイページへ戻るボタンを押せる
+    posted = request.args.get("posted") == "1"
+
+    # --- 4. 「いま編集中の投稿」があるか ---
+    edit_id = request.args.get("edit_id", type=int)
+
+    # --- 5. HTMLに値を渡して、画面作成 ---
     return render_template(
         "posts.html",
         rooms=ROOMS,                        # プルダウンのルーム一覧
         room_id=room_id,                    # 選択されているルームID
         room_name=find_room_name(room_id),  # 選択されているルーム名
         posts=posts,                        # 投稿画面に表示する投稿
+        posted=posted,                      # 投稿ボタンを押した後
+        edit_id=edit_id,                    # いま編集中の投稿ID
     )
-
 
 @post_bp.route("/posts", methods=["POST"])
 def create_post():
@@ -203,8 +210,7 @@ def create_post():
     # .strip() は、前後の余分な空白や改行を取り除く
     content = request.form.get("content", "").strip()
 
-    # 新しい投稿を作って追加する
-    # 空っぽの投稿は追加しない（スペースだけの投稿も防ぐ）
+    # 新しい投稿を追加（空・スペースだけの投稿は追加しない）
     if content != "":
         new_post = {
             "id": make_new_post_id(),
@@ -213,7 +219,7 @@ def create_post():
             # strftime は日時を「YYYY-MM-DD HH:MM」の形にする
             "created_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "replies": [],
-            "reactions": 0,
+            "reactions": {"応援": 0, "すごい": 0, "共感": 0},
             # 自分が投稿したものなので True（削除ボタン表示）
             "is_mine": True,
         }
@@ -223,26 +229,19 @@ def create_post():
         POSTS.setdefault(room_id, []).insert(0, new_post)
 
     # 投稿画面に戻る
-    # redirect は「別のページへ移動させる」処理。
-    # 投稿したあと、同じルームの投稿画面をもう一度表示する。
-    # 投稿後に移動させるのは、ブラウザの更新ボタンで二重投稿になるのを防ぐため。
-    return redirect(url_for("post.posts_view", room_id=room_id))
+    return redirect(url_for("post.posts_view", room_id=room_id, posted=1))
 
 
 @post_bp.route("/posts/<int:post_id>/delete", methods=["POST"])
 def delete_post(post_id):
     """削除ボタンが押されたとき（POST）の処理
-    【アドレスの <int:post_id> について】
-    /posts/3/delete のようにアクセスされると、真ん中の 3 が post_id という名前でこの関数に渡される。
-    int:なので数字だけ受け付け。
-
     【処理内容】
     1. どのルームの、どの投稿を削除するのか特定
     2. 自分の投稿かどうかを確認してから削除
     3. 投稿画面に戻る
     """
 
-    # どのルームかを受け取る
+    # どのルームか受け取る
     room_id = request.form.get("room_id", ROOMS[0]["id"])
 
     # そのルームの投稿リストを取り出す
@@ -256,8 +255,40 @@ def delete_post(post_id):
             # アドレスを直接打たれても消されないよう、ここでも確認する。
             if post["is_mine"]:
                 posts.remove(post)
-            # 見つかったので、これ以上さがす必要はない
-            # （リストを回している途中で消すため、必ず break で抜ける）
+            # 見つかったので、これ以上探す必要がないためbreakで抜ける
+            break
+
+    # 投稿画面に戻る
+    return redirect(url_for("post.posts_view", room_id=room_id))
+
+
+@post_bp.route("/posts/<int:post_id>/edit", methods=["POST"])
+def edit_post(post_id):
+    """「保存する」ボタンが押されたとき（POST）の処理
+    【処理内容】
+    1. どのルームの、どの投稿を編集するのか特定
+    2. 自分の投稿かどうかを確認してから書きかえる
+    3. 投稿画面に戻る（編集フォームは閉じる）
+    """
+
+    # どのルームかを受け取る
+    room_id = request.form.get("room_id", ROOMS[0]["id"])
+
+    # 書きかえた後の本文を受け取る
+    new_content = request.form.get("content", "").strip()
+
+    # そのルームの投稿リストを取り出す
+    posts = POSTS.get(room_id, [])
+
+    # 目的の投稿を探して、内容を書きかえる
+    for post in posts:
+        if post["id"] == post_id:
+            # 自分の投稿でなければ、書きかえずに何もしない
+            # 画面上は他人の投稿に編集ボタンを出していないが、
+            # アドレスを直接打たれても書きかえられないよう、ここでも確認
+            # 空の内容で保存されるのも防ぐ（content が空文字なら何もしない）
+            if post["is_mine"] and new_content != "":
+                post["content"] = new_content
             break
 
     # 投稿画面に戻る
