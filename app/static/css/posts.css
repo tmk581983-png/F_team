@@ -1,8 +1,9 @@
 /* ============================================================
    posts.css … 投稿画面のデザイン
-   クラス名は .post- / .room- / .new-post- のように
-   この画面だとわかる名前を付けています。
+   クラス名は .post- / .room- / .new-post- のようにこの画面だとわかる名前を付けています
    （他の画面と名前がかぶると、Gitが警告せずに見た目が壊れるため）
+   色やサイズは base.css の :root にまとめてあります
+   var(--名前) で呼び出し
    ============================================================ */
 
 /* ------- この画面の土台 ------- */
@@ -13,16 +14,16 @@
 body {
   margin: 0;
   padding: 0;
-  background: #f2f5f4;
-  font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
-  color: #12262e;
+  background: var(--bg-color);
+  font-family: var(--font-family);
+  color: var(--text-color);
 }
 
 /* 投稿画面全体の枠（横幅を制限して中央に寄せる） */
 .post-page {
   max-width: 640px;
   margin: 0 auto;
-  padding: 16px 16px 40px;
+  padding: var(--spacing) var(--spacing) 40px;
 }
 
 /* ------- マイページへ戻る ------- */
@@ -33,34 +34,56 @@ body {
 .back-link {
   display: inline-block;
   padding: 8px 16px;
-  background: #ffffff;
-  border: 1px solid #cdd8d8;
+  background: var(--card-color);
+  border: 1px solid var(--border-color);
   border-radius: 999px;
-  color: #12262e;
+  color: var(--text-color);
   font-size: 13px;
   font-weight: bold;
   text-decoration: none;
 }
 
+/* 未投稿のときのグレーアウト表示 */
+.back-link.disabled {
+  background: #eef1f0;
+  border-color: var(--border-color);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* グレーアウト中は、マウスを乗せても色を変えない */
+.back-link.disabled:hover {
+  background: #eef1f0;
+  border-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+/* 「投稿すると押せるようになります」の注意書き */
+.back-note {
+  margin-left: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
 .back-link:hover {
   background: #eef3f2;
-  border-color: #028090;
-  color: #028090;
+  border-color: var(--main-color);
+  color: var(--main-color);
 }
 
 /* ------- ルーム選択 ------- */
 .room-select {
-  background: #ffffff;
+  background: var(--card-color);
   border-radius: 10px;
-  padding: 14px 16px;
-  margin-bottom: 16px;
+  padding: 14px var(--spacing);
+  margin-bottom: var(--spacing);
 }
 
 .room-select label {
   display: block;
   font-size: 12px;
   font-weight: bold;
-  color: #5f7178;
+  color: var(--text-muted);
   margin-bottom: 6px;
 }
 
@@ -68,17 +91,17 @@ body {
   width: 100%;
   padding: 10px 12px;
   font-size: 15px;
-  border: 1px solid #cdd8d8;
-  border-radius: 8px;
-  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  background: var(--card-color);
 }
 
 /* ------- 投稿画面 ------- */
 .board {
-  background: #ffffff;
+  background: var(--card-color);
   border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 16px;
+  padding: var(--spacing);
+  margin-bottom: var(--spacing);
 }
 
 .board-title {
@@ -88,9 +111,9 @@ body {
 
 .board-room {
   font-size: 13px;
-  color: #028090;
+  color: var(--main-color);
   font-weight: bold;
-  margin: 0 0 16px;
+  margin: 0 0 var(--spacing);
 }
 
 /* 投稿1件 */
@@ -113,7 +136,7 @@ body {
 
 .post-time {
   font-size: 12px;
-  color: #8fa0a6;
+  color: var(--text-muted);
 }
 
 .post-body {
@@ -130,24 +153,58 @@ body {
 }
 
 .action {
-  border: 1px solid #cdd8d8;
-  background: #ffffff;
+  border: 1px solid var(--border-color);
+  background: var(--card-color);
   border-radius: 999px;
   padding: 5px 12px;
   font-size: 12px;
-  color: #5f7178;
+  color: var(--text-muted);
   cursor: pointer;
   font-family: inherit;
 }
 
+/* 自分の投稿のリアクション（押せない表示） */
+.action.disabled {
+  color: var(--text-muted);
+  cursor: default;
+}
+
 /* 削除ボタン（自分の投稿にだけ表示される） */
 .action-delete {
-  border-color: #e3bdb4;
-  color: #b5442f;
+  border-color: var(--danger-color);
+  color: var(--danger-color);
 }
 
 .action-delete:hover {
   background: #faede9;
+}
+
+/* ------- 編集フォーム（本文の代わりに表示される） ------- */
+.edit-form textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  resize: vertical;
+  margin-bottom: 8px;
+}
+
+.edit-form-footer {
+  display: flex;
+  gap: 8px;
+}
+
+/* 保存するボタン（他の action ボタンと役割を区別するため色を変える） */
+.action-save {
+  border-color: var(--main-color);
+  background: var(--main-color);
+  color: var(--card-color);
+}
+
+.action-save:hover {
+  background: var(--main-color-dark);
 }
 
 /* 返信 */
@@ -160,11 +217,11 @@ body {
 .reply {
   margin: 6px 0;
   font-size: 13px;
-  color: #5f7178;
+  color: var(--text-muted);
 }
 
 .empty {
-  color: #8fa0a6;
+  color: var(--text-muted);
   font-size: 14px;
   padding: 20px 0;
   text-align: center;
@@ -172,9 +229,9 @@ body {
 
 /* ------- 投稿フォーム ------- */
 .new-post {
-  background: #ffffff;
+  background: var(--card-color);
   border-radius: 10px;
-  padding: 16px;
+  padding: var(--spacing);
 }
 
 .new-post textarea {
@@ -182,8 +239,8 @@ body {
   padding: 12px;
   font-size: 15px;
   font-family: inherit;
-  border: 1px solid #cdd8d8;
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
   resize: vertical;
 }
 
@@ -194,10 +251,10 @@ body {
 }
 
 .btn-post {
-  background: #2b8f67;
-  color: #ffffff;
+  background: var(--main-color);
+  color: var(--card-color);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 10px 28px;
   font-size: 15px;
   font-weight: bold;
@@ -205,5 +262,5 @@ body {
 }
 
 .btn-post:hover {
-  background: #247a58;
+  background: var(--main-color-dark);
 }
