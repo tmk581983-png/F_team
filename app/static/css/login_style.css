@@ -6,8 +6,8 @@
 }
 
 body {
-  font-family: sans-serif;
-  background-color: #f4f4f4;
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -16,10 +16,10 @@ body {
 
 .auth-card {
   width: 400px;
-  background-color: white;
+  background-color: var(--card-color);
   padding: 40px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  border-radius: 8px;
+  border-radius: var(--radius);
 }
 
 .auth-card input {
@@ -29,11 +29,11 @@ body {
   box-sizing: border-box;
   border-radius: 4px;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing);
 }
 
 .form-group label {
@@ -44,27 +44,27 @@ body {
 .main-button {
   width: 100%;
   padding: 12px;
-  background-color: #2b8f67;
-  color: white;
+  background-color: var(--main-color);
+  color: var(--card-color);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-btn);
   cursor: pointer;
-  font-size: 16px;
+  font-size: var(--font-size);
   font-weight: bold;
 }
 
 .main-button:hover {
-  background-color: #247a58;
+  background-color: var(--main-color-dark);
 }
 
 .page-link {
-  margin-top: 16px;
+  margin-top: var(--spacing);
   text-align: center;
 }
 
 .page-link a {
   text-decoration: none;
-  color: #5c7fa6;
+  color: var(--link-color);
 }
 
 .page-link a:hover {

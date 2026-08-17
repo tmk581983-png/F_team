@@ -17,6 +17,7 @@ body {
 
 /* カード　*/
 .auth-card {
+    width: 400px;
     background-color: var(--card-color);
     padding: 40px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
