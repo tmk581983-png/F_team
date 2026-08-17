@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect,  url_for
+from utils.db import get_connection
 
 #新規登録画面用のBlueprint
 signup_bp = Blueprint(
@@ -26,6 +27,29 @@ def index():
             "signup.html",
             error="すべての項目を入力してください"
         )
+
+        #DBに接続する
+        connection = get_connection()
+
+        #同じlogin_idがすでに登録されていないか確認する
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT id FROM users WHERE login_id = %s" ,
+                (login_id,)
+            )
+            existing_user = cursor.fetchone()
+
+        #DBとの接続を閉じる
+        connection.close()
+
+        #同じlogin_idが見つかった場合
+        if existing_user:
+            return render_template(
+                "signup.html",
+                error="このIDはすでに使われています"
+            )
+
+
 
     #受け取れた値をDockerのログで確認する
         print(f"Login ID: {login_id}")
