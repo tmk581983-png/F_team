@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request, redirect,  url_for
+from flask import Blueprint, render_template, request, redirect,  url_for, session
+from flask_bcrypt import generate_password_hash
 from utils.db import get_connection
 
 #新規登録画面用のBlueprint
@@ -49,16 +50,34 @@ def index():
                 error="このIDはすでに使われています"
             )
 
+        #パスワードをハッシュ化する
+        hashed_password = generate_password_hash(password).decode("utf-8")
+
+        #新しいユーザーをusersテーブルに登録する
+        connection = get_connection()
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO users (name, login_id, password)
+                VALUES (%s, %s, %s)
+                """,
+                (user_name, login_id, hashed_password)
+
+            )
+
+            #今登録したユーザーのIDを取得する
+            user_id = cursor.lastrowid
 
 
-    #受け取れた値をDockerのログで確認する
-        print(f"Login ID: {login_id}")
-        print(f"User Name: {user_name}")
-        print(f"Password: {password}")
-        print("新規登録フォームが送信されました")
+        connection.commit()
+        connection.close()
+
+        #登録したユーザーのIDをsessionに保存する
+        session["user_id"] = user_id
 
 
-    #登録ボタンを押したらマイページへ移動する
+        #登録ボタンを押したらマイページへ移動する
         return redirect(url_for("mypage.index"))
     
 
