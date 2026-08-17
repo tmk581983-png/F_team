@@ -14,7 +14,15 @@
 body {
   margin: 0;
   padding: 0;
-  background: var(--bg-color);
+  background-color: var(--bg-color);
+  background-image:
+    linear-gradient(rgba(244, 244, 244, 0.88), rgba(244, 244, 244, 0.88)),
+    url("/static/images/bouzu.png");
+  background-repeat: no-repeat, repeat;
+  background-position: center, center;
+  background-size: cover, 330px auto;     /* 画像の大きさ（横110px） */
+  background-attachment: fixed, fixed;    /* スクロールしても背景は動かない */
+
   font-family: var(--font-family);
   color: var(--text-color);
 }
@@ -167,6 +175,21 @@ body {
 .action.disabled {
   color: var(--text-muted);
   cursor: default;
+}
+
+/* 自分が押し済みのリアクション（押すと取り消せる） */
+.action-active {
+  border-color: var(--main-color);
+  background: #eef3f2;
+  color: var(--main-color);
+  font-weight: bold;
+}
+
+/* リアクションボタンは1つずつ <form> に入っているため、
+   そのままだと縦に並んでしまう。横並びを保つための指定。 */
+.post-actions form {
+  display: inline;
+  margin: 0;
 }
 
 /* 削除ボタン（自分の投稿にだけ表示される） */

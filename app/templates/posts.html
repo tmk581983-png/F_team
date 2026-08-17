@@ -1,16 +1,11 @@
 {# ============================================================
    投稿画面
-     {{ 値 }}   … 値をその場に表示する
-     {% 命令 %} … くり返しや条件分岐などの命令
-
-   routes/post.py の render_template() で渡された
-   rooms / room_id / room_name / posts が使える。
    ============================================================ #}
 
-{# base.html（共通の外枠）を土台にする、という宣言 #}
+{# base.html（共通の外枠）を土台にする#}
 {% extends "base.html" %}
 
-{# ブラウザのタブに出るページ名 #}
+{# ブラウザのタブに表示 #}
 {% block title %}投稿画面{% endblock %}
 
 {# このページだけで使う CSS を読み込む #}
@@ -25,7 +20,6 @@
   {# マイページへ戻る #}
   <div class="post-nav">
     {% if posted %}
-    {# 投稿ボタンを押した後押せる #}
     <a class="back-link" href="{{ url_for('mypage.index') }}">マイページへ戻る</a>
     {% else %}
     {# 未投稿時はグレーアウト
@@ -38,15 +32,10 @@
 
   {# ============================================================
      ルームID選択プルダウン
-     ルームを選ぶと、そのルームの掲示板に切り替わる
-     method="get" なので、選んだ値がアドレスに付く
-       → /posts?room_id=room_02
      ============================================================ #}
   <form class="room-select" action="{{ url_for('post.posts_view') }}" method="get">
     <label for="room_id">チャレンジルーム</label>
 
-    {# onchange="this.form.submit()" は
-       「選択が変わったら、ボタンを押さなくても送信する」という指示 #}
     <select id="room_id" name="room_id" onchange="this.form.submit()">
 
       {# rooms（ルーム一覧）作成 #}
@@ -66,10 +55,10 @@
   <section class="board">
     <h1 class="board-title">チャレンジルーム名</h1>
 
-    {# いま見ているルーム名を表示 #}
+    {# 選択中のルーム名を表示 #}
     <p class="board-room">{{ room_name }}</p>
 
-    {# 投稿が1件でもあるかどうかで、表示を切り替える #}
+    {# 投稿が1件あるかで、表示を切り替え #}
     {% if posts %}
 
     {# posts（投稿リスト）を1件ずつ取り出して、順番に並べる #}
@@ -104,18 +93,31 @@
 
         {# ★ 自分の投稿には、リアクションできないようにする ★
              自分の投稿 → <span> にして押せなくする
-             他人の投稿 → <button> で押せるようにする #}
+             他人の投稿 → <form> で送信できるようにする #}
+        {% for r in post.reactions %}
+
         {% if post.is_mine %}
-        <span class="action disabled">応援！ {{ post.reactions["応援"] }}</span>
-        <span class="action disabled">すごい！ {{ post.reactions["すごい"] }}</span>
-        <span class="action disabled">共感！ {{ post.reactions["共感"] }}</span>
+        {# 自分の投稿。件数は見えるが押せない #}
+        <span class="action disabled">{{ r.emoji }} {{ r.label }} {{ r.count }}</span>
+
         {% else %}
-        <button type="button" class="action">応援！ {{ post.reactions["応援"] }}</button>
-        <button type="button" class="action">すごい！ {{ post.reactions["すごい"] }}</button>
-        <button type="button" class="action">共感！ {{ post.reactions["共感"] }}</button>
+        {# 他人の投稿 #}
+        <form action="{{ url_for('post.react', post_id=post.id) }}" method="post">
+
+          {# どのルームを見ていたか、どの種類を押したかを送る #}
+          <input type="hidden" name="room_id" value="{{ room_id }}">
+          <input type="hidden" name="reaction_type" value="{{ r.type }}">
+
+          {# r.active 自分が押下後は色を変える #}
+          <button type="submit" class="action {% if r.active %}action-active{% endif %}">
+            {{ r.emoji }} {{ r.label }} {{ r.count }}
+          </button>
+        </form>
         {% endif %}
 
-        {# 返信は、いまは表示のみ（押しても何も起きない） #}
+        {% endfor %}
+
+        {# 返信は表示のみ（押しても何も起きない） #}
         <button type="button" class="action">返信 {{ post.replies|length }}</button>
 
         {# ★ 自分の投稿のときだけ、編集ボタんと削除ボタンを表示する ★
@@ -134,7 +136,7 @@
           {# どのルームの投稿かを、一緒に送る #}
           <input type="hidden" name="room_id" value="{{ room_id }}">
 
-          {# onclick の confirm は「本当に消しますか？」の確認ダイアログ。
+          {# onclick の confirm は「本当に削除しますか？」の確認ダイアログ。
              キャンセルを押すと削除されない #}
           <button type="submit" class="action action-delete" onclick="return confirm('この投稿を削除しますか？');">
             削除

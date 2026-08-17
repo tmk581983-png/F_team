@@ -1,17 +1,22 @@
 """
 投稿画面の処理
 
-【R8.7.23現在】
-DB接続はまだしないので、ダミーデータ（ ROOMS と POSTS）を表示。
-後ほどmodels/post.py（DB操作）に置きかえ予定。
+【R8.8.16 更新】
+posts テーブルへのDB接続
+一覧の取得・投稿・削除・編集は、すべて models/post.py 経由
+
+チャレンジルームの一覧も rooms テーブルから取得するようにした。
+ファイル内に直接書いていたリスト（ROOMS）は削除している。
+
+【まだダミーのままの部分】
+・reactions（応援！／すごい！／共感！） … reactions テーブルとの連携が必要
+・is_mine（自分の投稿かどうか） … ログイン機能が session にユーザーIDを
+  保存するようになったら、session["user_id"] と比較する形に直す。
+  それまでは CURRENT_USER_ID（下で定義）を「いまログインしている人」として仮に使う。
 
 【処理の流れ】
-ブラウザ → 本ファイル →（データを渡す）→ templates/posts.html → ブラウザに表示
-
+ブラウザ → 本ファイル →（models/post.py 経由でDBを読み書き）→ templates/posts.html → ブラウザに表示
 """
-
-# 投稿日時
-from datetime import datetime
 
 #   Blueprint      … アプリを分割して管理する仕組み
 #   render_template… flaskモジュールのFlaskクラスとrender_template関数。HTMLファイルに値を差し込んで表示
@@ -19,6 +24,16 @@ from datetime import datetime
 #   redirect       … 別のページへ移動
 #   url_for        … エンドポイントのURLを利用
 from flask import Blueprint, render_template, request, redirect, url_for
+
+from models.post import (
+    get_all_rooms,
+    get_posts_by_room,
+    get_reactions_by_room,
+    toggle_reaction,
+    create_post as db_create_post,
+    delete_post as db_delete_post,
+    update_post as db_update_post,
+)
 
 
 # ============================================================
@@ -29,100 +44,40 @@ from flask import Blueprint, render_template, request, redirect, url_for
 # この名前は url_for 使用（例：url_for("post.posts_view")）
 post_bp = Blueprint("post", __name__)
 
-# チャレンジルームの一覧（プルダウンの中身）
-# DB接続後に該当テーブルからパラメータを取得する
-ROOMS = [
-    {"id": "room_01", "name": "目指せ！150ステップクリア！"},
-    {"id": "room_02", "name": "ネットワークわけわからん"},
-    {"id": "room_03", "name": "今から日報書きます"},
-    {"id": "room_04", "name": "言語化してみる"},
-    {"id": "room_05", "name": "一休み一休み"},
-]
+# チャレンジルームの一覧は、models/post.py の get_all_rooms() 経由で
+# rooms テーブルから取得する。ここに直接書かない。
 
+# ★ ログイン機能が未実装のため、仮の「いまログインしている人」のID。
+#    session["user_id"] が使えるようになったら、この行ごと削除して
+#    各関数の中で session.get("user_id") を使う形に置きかえる。
+CURRENT_USER_ID = 1
 
-# 投稿のダミーデータ
-# DB接続後にposts テーブル？から取ってくる予定の処理
-# 「ルームID」をキーにして、そのルームの投稿リストを持っている
-#   POSTS["room_01"] → room_01 の投稿が入ったリスト
+# リアクションの種類
+# DBの reactions.reaction_type に入る番号と、画面表示の対応表。
+# 種類は仕様上3つで固定のため、マスタテーブルは作らずここで持つ。
 #
-# 1件の投稿が持っている情報：
-#   id         … 投稿を見分けるための番号（削除するときに使う）
-#   user_name  … 投稿したユーザ
-#   content    … 投稿文
-#   created_at … 投稿した日時
-#   replies    … 投稿への返信（今は表示のみ）
-#   reactions  … リアクションの数。「応援」「すごい」「共感」の3種類を持つ
-#                （今は表示のみ。押しても数は増えない）
-#   is_mine    … 自分の投稿 = True　※自分の投稿のみ削除ボタンを表示
-#               　投稿したユーザID = ログイン中のユーザID　で判定
-POSTS = {
-    "room_01": [
-        {
-            "id": 1,
-            "user_name": "テスト1",
-            "content": "今日は5ステップ進めました！",
-            "created_at": "2026-07-26 05:12",
-            "replies": ["すごい！わたしも頑張ります", "一緒にハッカソンに出場しましょう"],
-            "reactions": {"応援": 3, "すごい": 1, "共感": 0},
-            "is_mine": False,
-        },
-        {
-            "id": 2,
-            "user_name": "テスト2",
-            "content": "150ステップ達成しました！",
-            "created_at": "2026-07-26 06:03",
-            "replies": ["おめでとうございます"],
-            "reactions": {"応援": 5, "すごい": 2, "共感": 1},
-            "is_mine": False,
-        },
-        {
-            "id": 3,
-            "user_name": "あなた",
-            "content": "今日のステップは時間がかかるので、明日に完了させます",
-            "created_at": "2026-07-26 06:30",
-            "replies": [],
-            "reactions": {"応援": 1, "すごい": 0, "共感": 0},
-            "is_mine": True,
-        },
-    ],
-    "room_02": [
-        {
-            "id": 4,
-            "user_name": "テスト3",
-            "content": "OSI参照モデルを覚えました",
-            "created_at": "2026-07-26 21:40",
-            "replies": [],
-            "reactions": {"応援": 2, "すごい": 1, "共感": 0},
-            "is_mine": False,
-        },
-    ],
-    "room_03": [
-        {
-            "id": 5,
-            "user_name": "田中四郎",
-            "content": "日報提出でしました！あと1分のところでギリギリセーフ！",
-            "created_at": "2026-07-26 22:15",
-            "replies": ["よかったですね！私は間に合いませんでした。涙"],
-            "reactions": {"応援": 1, "すごい": 0, "共感": 2},
-            "is_mine": False,
-        },
-    ],
-    # 投稿がまだ無いルームは、空のリスト [] 
-    "room_04": [],
-    "room_05": [],
-}
+# ★ 画像を用意したら、"emoji" を "image" に置きかえて
+#    posts.html 側を <img> にすれば差し替えられる。
+REACTION_TYPES = [
+    {"type": 1, "label": "応援！",   "emoji": "👏"},
+    {"type": 2, "label": "すごい！", "emoji": "🎉"},
+    {"type": 3, "label": "共感！",   "emoji": "🤝"},
+]
 
 
 # ============================================================
 # 補助の関数（画面の処理から呼び出す）
 # ============================================================
 
-def find_room_name(room_id):
+def find_room_name(rooms, room_id):
     """ルームIDから、ルーム名を探して返す
     見つからなかったときは、空の文字 "" を返す
+
+    rooms は get_all_rooms() で取ってきた一覧。
+    DBを2回引かずに済むよう、取得済みの一覧を渡してもらう形にしている。
     """
-    # ROOMS のリストを、上から1つずつ見ていく
-    for room in ROOMS:
+    # rooms のリストを、上から1つずつ見ていく
+    for room in rooms:
         # IDが一致したら、ルーム名を返して終了
         if room["id"] == room_id:
             return room["name"]
@@ -130,24 +85,58 @@ def find_room_name(room_id):
     return ""
 
 
-def make_new_post_id():
-    """新しい投稿ID作成
-    すべての投稿から最大値のIDを探し、+1 して新しいIDを返す
-    データベースを使うようになると、MySQL が AUTO_INCREMENT で自動採番してくれるため、この関数は不要になる
+def to_view_posts(rows, reactions):
+    """DBから取ってきた行を、posts.html が扱いやすい形に整える
+
+    【引数】
+    rows      … get_posts_by_room() の結果（投稿そのもの）
+    reactions … get_reactions_by_room() の結果（件数＋自分の押下状態）
+
+    【やっていること】
+    1. created_at（datetime型）を「2026-08-16 09:30」の文字に直す
+    2. is_mine（自分の投稿かどうか）を追加する
+    3. リアクションを、種類ごとの件数と押下状態に組み立てる
     """
-    all_ids = []
+    # --- リアクションを、引きやすい形に変換する ---
+    # {投稿ID: {種類番号: {"count": 件数, "mine": 押したか}}}
+    reaction_map = {}
+    for row in reactions:
+        reaction_map.setdefault(row["post_id"], {})[row["reaction_type"]] = {
+            "count": row["count"],
+            # SUM の結果は Decimal 型で返るため、int に直してから判定する
+            "mine": int(row["mine"] or 0) > 0,
+        }
 
-    # POSTS.values() は「ルームのすべての投稿」を順に取り出す
-    for post_list in POSTS.values():
-        for post in post_list:
-            all_ids.append(post["id"])
+    posts = []
+    for row in rows:
+        post_id = row["id"]
 
-    # 投稿が1件も無いときは、最初のIDを 1 にする
-    if len(all_ids) == 0:
-        return 1
+        # この投稿のリアクションを、種類ごとに組み立てる
+        reactions_view = []
+        for rt in REACTION_TYPES:
+            # この投稿・この種類のデータ（誰も押していなければ None）
+            data = reaction_map.get(post_id, {}).get(rt["type"])
+            reactions_view.append({
+                "type": rt["type"],
+                "label": rt["label"],
+                "emoji": rt["emoji"],
+                "count": data["count"] if data else 0,
+                # 自分が押しているか（ボタンの色を変えるために使う）
+                "active": data["mine"] if data else False,
+            })
 
-    # リストの中でいちばん大きい数を返す
-    return max(all_ids) + 1
+        posts.append({
+            "id": post_id,
+            "user_name": row["user_name"],
+            "content": row["contents"],
+            "created_at": row["created_at"].strftime("%Y-%m-%d %H:%M"),
+            "is_mine": row["user_id"] == CURRENT_USER_ID,
+            "reactions": reactions_view,
+            # ★ 返信機能は未実装（いまは常に空）
+            "replies": [],
+        })
+    return posts
+
 
 # ============================================================
 # 画面の処理（本体）
@@ -156,37 +145,51 @@ def make_new_post_id():
 def posts_view():
     #ブラウザで /posts を開いたとき（GET）に投稿ページを表示する。
 
-    # --- 1. どのルームを見たいのか受け取る ---
-    # アドレスの「?room_id=room_01」の部分を読み取り
+    # --- 1. ルームの一覧をDBから取り出す ---
+    # プルダウンの中身になる。rooms テーブルが空なら空のリストが返る。
+    rooms = get_all_rooms()
+
+    # --- 2. どのルームを見たいのか受け取る ---
+    # アドレスの「?room_id=1」の部分を読み取り
     # request.args は「アドレスに付いてきた値」を受け取る
-    # 第2引数の ROOMS[0]["id"] は「指定が無かったときの初期値」。
-    # ここでは、いちばん上のルーム（room_01）を表示。
-    #前の画面から /posts?room_id=room_03 のように呼ばれると、
+    # type=int を付けると、文字の "1" ではなく数値の 1 で受け取れる。
+    # （DBの rooms.id が数値なので、そろえておくと比較で迷わない）
+    #前の画面から /posts?room_id=3 のように呼ばれると、
     #そのルームが最初から選ばれた状態で開く。
-    room_id = request.args.get("room_id", ROOMS[0]["id"])
+    room_id = request.args.get("room_id", type=int)
 
-    # --- 2. そのルームの投稿を取り出す ---
-    # .get() は「キーが無ければ、代わりにこれを返して」という処理
-    # 存在しないルームIDが来ても、エラーにならず空のリストになる。
-    posts = POSTS.get(room_id, [])
+    # 指定が無かったときは、いちばん上のルームを表示する。
+    # ルームが1件も無いときは None のままにして、下でDBを引かないようにする。
+    if room_id is None:
+        room_id = rooms[0]["id"] if rooms else None
 
-    # --- 3. 投稿ボタンを押したか判定 ---
+    # --- 3. そのルームの投稿とリアクションをDBから取り出す ---
+    if room_id is not None:
+        posts = to_view_posts(
+            get_posts_by_room(room_id),                       # 投稿そのもの
+            get_reactions_by_room(CURRENT_USER_ID, room_id),  # リアクション
+        )
+    else:
+        posts = []
+
+    # --- 4. 投稿ボタンを押したか判定 ---
     # 「posted=1」で、マイページへ戻るボタンを押せる
     posted = request.args.get("posted") == "1"
 
-    # --- 4. 「いま編集中の投稿」があるか ---
+    # --- 5. 「いま編集中の投稿」があるか ---
     edit_id = request.args.get("edit_id", type=int)
 
-    # --- 5. HTMLに値を渡して、画面作成 ---
+    # --- 6. HTMLに値を渡して、画面作成 ---
     return render_template(
         "posts.html",
-        rooms=ROOMS,                        # プルダウンのルーム一覧
-        room_id=room_id,                    # 選択されているルームID
-        room_name=find_room_name(room_id),  # 選択されているルーム名
+        rooms=rooms,                               # プルダウンのルーム一覧
+        room_id=room_id,                           # 選択されているルームID
+        room_name=find_room_name(rooms, room_id),  # 選択されているルーム名
         posts=posts,                        # 投稿画面に表示する投稿
         posted=posted,                      # 投稿ボタンを押した後
         edit_id=edit_id,                    # いま編集中の投稿ID
     )
+
 
 @post_bp.route("/posts", methods=["POST"])
 def create_post():
@@ -194,39 +197,23 @@ def create_post():
 
     【処理】
     1. 投稿フォームに入力された内容を受け取る
-    2. 新しい投稿を作って、リストの先頭に追加する
+    2. DBの posts テーブルに保存する
     3. 投稿画面に戻る
-
-    ★ データベースに接続するまでは、上の POSTS に追加。
-       このため、コンテナを再起動すると投稿は消える。
     """
 
     # request.form は「フォームから送られてきた値」を受け取る。
     # （アドレスに付いてくる値は request.args、フォームは request.form）
 
-    # どのルームへの投稿かは、HTMLの hidden 項目で一緒に送られてくる
-    room_id = request.form.get("room_id", ROOMS[0]["id"])
+    # どのルームへの投稿かは、HTMLの hidden 項目で一緒に送られてくる。
+    # フォームの値は必ず文字で届くので、type=int で数値に直して受け取る。
+    room_id = request.form.get("room_id", type=int)
 
     # .strip() は、前後の余分な空白や改行を取り除く
     content = request.form.get("content", "").strip()
 
-    # 新しい投稿を追加（空・スペースだけの投稿は追加しない）
-    if content != "":
-        new_post = {
-            "id": make_new_post_id(),
-            "user_name": "あなた",
-            "content": content,
-            # strftime は日時を「YYYY-MM-DD HH:MM」の形にする
-            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "replies": [],
-            "reactions": {"応援": 0, "すごい": 0, "共感": 0},
-            # 自分が投稿したものなので True（削除ボタン表示）
-            "is_mine": True,
-        }
-
-        # setdefault は「そのルームのリストが無ければ、空のリストを作る」
-        # insert(0, ...) は「リストの先頭に入れる」＝新しい投稿が一番上に出る
-        POSTS.setdefault(room_id, []).insert(0, new_post)
+    # 空・スペースだけの投稿はDBに保存しない
+    if content != "" and room_id is not None:
+        db_create_post(CURRENT_USER_ID, room_id, content)
 
     # 投稿画面に戻る
     return redirect(url_for("post.posts_view", room_id=room_id, posted=1))
@@ -236,60 +223,64 @@ def create_post():
 def delete_post(post_id):
     """削除ボタンが押されたとき（POST）の処理
     【処理内容】
-    1. どのルームの、どの投稿を削除するのか特定
-    2. 自分の投稿かどうかを確認してから削除
+    1. どのルームの投稿を削除するのか特定
+    2. DB側で「自分の投稿かどうか」を確認しつつ削除（models/post.py 内）
     3. 投稿画面に戻る
+
+    ※ 自分の投稿でなければ、models 側の WHERE 条件に一致しないため、
+       何も削除されずに終わる。アドレスを直接打たれても安全。
     """
 
-    # どのルームか受け取る
-    room_id = request.form.get("room_id", ROOMS[0]["id"])
+    # どのルームか受け取る（戻り先の画面を決めるために使う）
+    room_id = request.form.get("room_id", type=int)
 
-    # そのルームの投稿リストを取り出す
-    posts = POSTS.get(room_id, [])
-
-    # 目的の投稿を探して削除（リストを1件ずつ見ていき、IDが一致したものを削除する）
-    for post in posts:
-        if post["id"] == post_id:
-            # 自分の投稿でなければ、削除せずに何もしない
-            # 画面上は他人の投稿に削除ボタンを出していないが、
-            # アドレスを直接打たれても消されないよう、ここでも確認する。
-            if post["is_mine"]:
-                posts.remove(post)
-            # 見つかったので、これ以上探す必要がないためbreakで抜ける
-            break
+    db_delete_post(post_id, CURRENT_USER_ID)
 
     # 投稿画面に戻る
     return redirect(url_for("post.posts_view", room_id=room_id))
-
 
 @post_bp.route("/posts/<int:post_id>/edit", methods=["POST"])
 def edit_post(post_id):
     """「保存する」ボタンが押されたとき（POST）の処理
     【処理内容】
-    1. どのルームの、どの投稿を編集するのか特定
-    2. 自分の投稿かどうかを確認してから書きかえる
+    1. どのルームの投稿を編集するのか特定
+    2. DB側で「自分の投稿かどうか」を確認しつつ書きかえる（models/post.py 内）
     3. 投稿画面に戻る（編集フォームは閉じる）
     """
 
-    # どのルームかを受け取る
-    room_id = request.form.get("room_id", ROOMS[0]["id"])
+    # どのルームかを受け取る（戻り先の画面を決めるために使う）
+    room_id = request.form.get("room_id", type=int)
 
     # 書きかえた後の本文を受け取る
     new_content = request.form.get("content", "").strip()
 
-    # そのルームの投稿リストを取り出す
-    posts = POSTS.get(room_id, [])
+    # 空の内容で保存されるのを防ぐ
+    if new_content != "":
+        db_update_post(post_id, CURRENT_USER_ID, new_content)
 
-    # 目的の投稿を探して、内容を書きかえる
-    for post in posts:
-        if post["id"] == post_id:
-            # 自分の投稿でなければ、書きかえずに何もしない
-            # 画面上は他人の投稿に編集ボタンを出していないが、
-            # アドレスを直接打たれても書きかえられないよう、ここでも確認
-            # 空の内容で保存されるのも防ぐ（content が空文字なら何もしない）
-            if post["is_mine"] and new_content != "":
-                post["content"] = new_content
-            break
+    # 投稿画面に戻る
+    return redirect(url_for("post.posts_view", room_id=room_id))
+
+
+@post_bp.route("/posts/<int:post_id>/reaction", methods=["POST"])
+def react(post_id):
+    """リアクションボタンが押されたとき（POST）の処理
+
+    すでに押していれば取り消し、押していなければ登録する（トグル）。
+    自分の投稿には押せない、という確認は models 側で行っている。
+
+    ※ リアクションは、登録していないチャレンジルームでも可能。
+       投稿は「自分の課題達成の記録」なので登録ルームに限るが、
+       リアクションは「他の人を応援する行為」であり、
+       応援できる範囲を狭める理由がないため。
+    """
+    room_id = request.form.get("room_id", type=int)
+    reaction_type = request.form.get("reaction_type", type=int)
+
+    # 想定外の番号が送られてきたときは、何もしない
+    valid_types = [rt["type"] for rt in REACTION_TYPES]
+    if reaction_type in valid_types:
+        toggle_reaction(CURRENT_USER_ID, post_id, reaction_type)
 
     # 投稿画面に戻る
     return redirect(url_for("post.posts_view", room_id=room_id))
