@@ -1,3 +1,4 @@
+import os
 from flask import Flask, redirect, session, url_for
 from routes.login import login_bp
 from routes.signup import signup_bp
@@ -7,6 +8,9 @@ from routes.mypage import mypage_bp
 from routes.post import post_bp
 
 app = Flask(__name__)
+
+app.config["SECRET_KEY"]= os.getenv("SECRET_KEY")
+
 
 # Blueprint登録
 app.register_blueprint(login_bp)
