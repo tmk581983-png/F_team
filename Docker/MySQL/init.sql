@@ -34,12 +34,14 @@ CREATE TABLE posts (
   user_id BIGINT UNSIGNED NOT NULL,
   room_id BIGINT UNSIGNED NOT NULL,
   contents VARCHAR(255) NOT NULL,
+  parent_post_id BIGINT UNSIGNED,  -- 投稿画面の返信用に追加
   created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
   deleted_at DATETIME(6),
 
   FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (room_id) REFERENCES rooms(id)
+  FOREIGN KEY (room_id) REFERENCES rooms(id),
+  FOREIGN KEY (parent_post_id) REFERENCES posts(id)  -- 投稿画面の返信用に追加
 );
 
 CREATE TABLE reactions (
