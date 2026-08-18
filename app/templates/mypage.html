@@ -8,9 +8,12 @@
 
 {% block content %}
   <div class="mypage">
-    <a class="logout-link" href="{{ url_for('login.login') }}">ログアウト</a>
+    <form class="logout-form" method="POST" action="{{ url_for('mypage.logout') }}">
+      <button type="submit" class="logout-link">ログアウト</button>
+    </form>
 
     <h2 class="page-title">マイページ</h2>
+
 
     <div class="mypage-main">
       <div class="card">
@@ -21,29 +24,52 @@
 
           <div class="profile-detail">
             <div class="profile-top">
-              <p>{{ name }}</p>
+              <p>{{ user.name }}</p>
               <button>アカウント管理</button>
             </div>
 
             <div class="profile-bottom">
-              <p>累計達成回数：{{ achievement_count }}回</p>
+              <p>累計達成回数：{{ achievement_data.achievement_count }}回</p>
+            </div>
+
+            <div class="activity-calendar">
+              {% for day in activity_data %}
+                <div class="activity-cell {{ day.status }}" title="{{ day.date }}"></div>
+              {% endfor %}
             </div>
           </div>
         </div>
       </div>
 
       <h3 class="section-title">参加中のチャレンジルーム（上限は1つまで）</h3>
-      
-      <div class="card">
-        <div class="room-detail">
-          <h4>{{ joined_room.name }}</h4>
-          <p class="participant-count">参加中： {{ joined_room.member_count }}人</p>
+
+      {% if joined_room %}
+        {# 参加中のルームを表示 #}
+        <div class="card">
+          <div class="room-detail">
+            <h4>{{ joined_room.name }}</h4>
+            <p class="participant-count">参加中：{{ joined_room.member_count }}人</p>
+          </div>
         </div>
-      </div>
-      
-      <div class="enter-room-container">
-        <a class="enter-room-button" href="{{ url_for('challenge.room', room_id=joined_room.id) }}">【{{ joined_room.name }}】ルームに入室</a>
-      </div>
+        
+        <div class="room-button-container">
+          <a class="room-button" href="{{ url_for('challenge.room', room_id=joined_room.room_id) }}">【{{ joined_room.name }}】ルームに入室</a>
+        </div>
+      {% else %}
+        {# 参加中のルームがない場合のメッセージを表示 #}
+        <div class="card">
+          <div class="room-detail-empty">
+            <h4>
+              現在、参加中のルームはありません<br>
+              ルームを選んでチャレンジを始めましょう！
+            </h4>
+          </div>
+        </div>
+
+        <div class="room-button-container">
+          <a class="room-button" href="{{ url_for('room_list.index') }}">ルームを選ぶ</a>
+        </div>
+      {% endif %}
     </div>
   </div>
 {% endblock %}
