@@ -1,50 +1,48 @@
-<!DOCTYPE html>
-<html lang="ja">
+{% extends "base.html" %}
 
-<head>
-  <meta charset="utf-8" >
-  <title>チャレンジルーム</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+{% block title %}チャレンジルーム | 三日坊主を極める{% endblock %}
+
+{% block page_css %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/challenge.css')}}">
-</head>
-<body>
-  <header>
-    <p>チャレンジルーム</p>
-  </header>
+{% endblock %}
+{% block content %}
+
     <main>
       <div class="challenge_header">
-        <h2>{{ room_name }}</h2>
-        <p>参加人数 : {{ users|length}}人</p>
-        <a href="{{ url_for('room_list.index')}}" class="back-btn" id="back-button">戻る</a>
+        <h2>{{ room_name }}</h2>   
+        <a href="{{ url_for('mypage.index')}}" class="back-btn" id="back-button">戻る</a>
       </div>
+      <p class="challenge_header">参加人数 : {{ users|length}}人</p>
       <div class="set-timebox">
         <div class="set-time" id="setTime">00:00<span>/10:00</span></div>
           <div class="post_lists">
             {% for user in users %}
               <div class="post_list">
-                {{ user.name }}
+                
+                <span class="user-name">{{ user.name }}</span>
+                <span class="user-content">
                 {% if user.contents %}
                   {{ user.contents }}
                 {% else %}
                    投稿データなし
                 {% endif %}
+                </span>
               </div>
             {% endfor %}
 
           </div>
 
-        <button class="time-btn" id="start">▶️ 開始！</button>  
+        <button class="time-btn" id="start">▶️ チャレンジ開始！</button>  
         
       </div>
 
       <div class="result-box">
-        <a href="{{ url_for('post.posts_view')}}" class="result_report disabled" id="resultReport" >達成報告を投稿</a>
+        <a href="{{ url_for('post.posts_view')}}" class="result_report disabled" id="resultReport" >達成報告</a>
       </div>
-      <p class="memo">※学習10分経過後、有効</p>
+      <p class="memo">※学習10分経過後、有効になります</p>
     </main>
 
+
 <script src="{{ url_for('static', filename='js/challenge.js')}}"></script>
-</body>
 
-
-</html>
+{% endblock %}

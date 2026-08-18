@@ -10,9 +10,7 @@ from routes.post import post_bp
 
 app = Flask(__name__)
 
-# セッション（ログイン状態の保持）に使う秘密鍵
-# これを設定しないと session に値を書き込んだ瞬間にエラーになる
-app.secret_key = os.getenv("SECRET_KEY")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
 # Blueprint登録
 app.register_blueprint(login_bp)
