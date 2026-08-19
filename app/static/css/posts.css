@@ -1,9 +1,7 @@
 /* ============================================================
    posts.css … 投稿画面のデザイン
-   クラス名は .post- / .room- / .new-post- のようにこの画面だとわかる名前を付けています
+   クラス名は .post- / .room- / .new-post- のようにこの画面だとわかる名前
    （他の画面と名前がかぶると、Gitが警告せずに見た目が壊れるため）
-   色やサイズは base.css の :root にまとめてあります
-   var(--名前) で呼び出し
    ============================================================ */
 
 /* ------- この画面の土台 ------- */
@@ -14,7 +12,15 @@
 body {
   margin: 0;
   padding: 0;
-  background: var(--bg-color);
+  background-color: var(--bg-color);
+  background-image:
+    linear-gradient(rgba(244, 244, 244, 0.88), rgba(244, 244, 244, 0.88)),
+    url("/static/images/bouzu.png");
+  background-repeat: no-repeat, repeat;
+  background-position: center, center;
+  background-size: cover, 330px auto;     /* 画像の大きさ（横110px） */
+  background-attachment: fixed, fixed;    /* スクロールしても背景は動かない */
+
   font-family: var(--font-family);
   color: var(--text-color);
 }
@@ -26,7 +32,7 @@ body {
   padding: var(--spacing) var(--spacing) 40px;
 }
 
-/* ------- マイページへ戻る ------- */
+/* マイページへ戻る */
 .post-nav {
   margin-bottom: 12px;
 }
@@ -71,7 +77,7 @@ body {
   color: var(--main-color);
 }
 
-/* ------- ルーム選択 ------- */
+/* ルーム選択 */
 .room-select {
   background: var(--card-color);
   border-radius: 10px;
@@ -96,7 +102,7 @@ body {
   background: var(--card-color);
 }
 
-/* ------- 投稿画面 ------- */
+/* 投稿画面 */
 .board {
   background: var(--card-color);
   border-radius: 10px;
@@ -163,13 +169,27 @@ body {
   font-family: inherit;
 }
 
-/* 自分の投稿のリアクション（押せない表示） */
+/* 自分の投稿のリアクション（押せない） */
 .action.disabled {
   color: var(--text-muted);
   cursor: default;
 }
 
-/* 削除ボタン（自分の投稿にだけ表示される） */
+/* 自分が押し済みのリアクション（押すと取り消せる） */
+.action-active {
+  border-color: var(--main-color);
+  background: #eef3f2;
+  color: var(--main-color);
+  font-weight: bold;
+}
+
+/* リアクションボタンを横並びにする（指定しないと縦に並ぶ） */
+.post-actions form {
+  display: inline;
+  margin: 0;
+}
+
+/* 削除ボタン（自分の投稿にだけ表示） */
 .action-delete {
   border-color: var(--danger-color);
   color: var(--danger-color);
@@ -179,7 +199,7 @@ body {
   background: #faede9;
 }
 
-/* ------- 編集フォーム（本文の代わりに表示される） ------- */
+/* 編集フォーム */
 .edit-form textarea {
   width: 100%;
   padding: 10px;
@@ -196,7 +216,7 @@ body {
   gap: 8px;
 }
 
-/* 保存するボタン（他の action ボタンと役割を区別するため色を変える） */
+/* 保存ボタン */
 .action-save {
   border-color: var(--main-color);
   background: var(--main-color);
@@ -218,6 +238,39 @@ body {
   margin: 6px 0;
   font-size: 13px;
   color: var(--text-muted);
+}
+
+.reply-user {
+  font-weight: bold;
+}
+
+.reply-form {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.reply-form input[type="text"] {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+}
+
+.reply-submit {
+  padding: 6px 14px;
+  font-size: 13px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--main-color);
+  color: var(--card-color);
+  cursor: pointer;
+}
+
+.reply-submit:hover {
+  background: var(--main-color-dark);
 }
 
 .empty {
@@ -263,4 +316,143 @@ body {
 
 .btn-post:hover {
   background: var(--main-color-dark);
+}
+
+/* ルーム選択（現在のルーム名） */
+.room-select-current {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  font-size: 15px;
+  font-family: inherit;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  background: var(--card-color);
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.room-select-arrow {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ルーム一覧（モーダル）*/
+.room-dialog {
+  width: min(480px, 90vw);
+  max-height: 80vh;
+  border: none;
+  border-radius: 12px;
+  padding: 0;
+}
+
+.room-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.room-dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.room-dialog-header h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.room-dialog-close {
+  border: none;
+  background: none;
+  font-size: 18px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.room-dialog-list {
+  padding: var(--spacing);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.room-card {
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-family: inherit;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  background: var(--card-color);
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.room-card:hover {
+  border-color: var(--main-color);
+  background: #eef3f2;
+}
+
+/* 現在選んでいるルーム */
+.room-card-active {
+  border-color: var(--main-color);
+  background: #eef3f2;
+  color: var(--main-color);
+  font-weight: bold;
+}
+
+/* 登録していないルームの表示 */
+.read-only {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.read-only p {
+  margin: 0;
+}
+
+/* 卒業時のポップアップ */
+.graduation-dialog {
+  width: min(340px, 90vw);
+  border: none;
+  border-radius: 12px;
+  padding: 0;
+}
+
+.graduation-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.graduation-dialog-body {
+  padding: 28px var(--spacing);
+  text-align: center;
+}
+
+.graduation-title {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--main-color);
+}
+
+.graduation-message {
+  margin: 0 0 20px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-color);
+}
+
+.graduation-secondary {
+  display: block;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-decoration: underline;
 }
