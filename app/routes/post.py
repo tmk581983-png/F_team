@@ -56,8 +56,8 @@ def find_room_name(rooms, room_id):
     """ルームIDから、ルーム名を探して返す
     見つからなかったときは、空の文字 "" を返す
 
-    rooms は get_posts_view_data() で取ってきた一覧。
-    DBを2回引かずに済むよう、取得済みの一覧を渡してもらう形にしている。
+    roomsはget_posts_view_data()で取ってきた一覧
+    DBを2回見に行かないように取得済みの一覧を渡してもらうようにしている。
     """
     # rooms のリストを、上から1行ずつ見る
     for room in rooms:
