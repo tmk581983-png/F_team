@@ -181,7 +181,7 @@ def get_posts_view_data(user_id, room_id):
                         posts.id,
                         posts.user_id,
                         posts.room_id,
-                        posts.contents,
+                        posts.content,
                         posts.created_at,
                         users.name AS user_name
                     FROM posts
@@ -219,7 +219,7 @@ def get_posts_view_data(user_id, room_id):
                     SELECT
                         replies.id,
                         replies.parent_post_id,
-                        replies.contents,
+                        replies.content,
                         replies.created_at,
                         users.name AS user_name
                     FROM posts AS replies
@@ -256,7 +256,7 @@ def create_reply(user_id, room_id, parent_post_id, content):
 
             cur.execute(
                 """
-                INSERT INTO posts (user_id, room_id, contents, parent_post_id)
+                INSERT INTO posts (user_id, room_id, content, parent_post_id)
                 VALUES (%s, %s, %s, %s)
                 """,
                 (user_id, room_id, content, parent_post_id),
@@ -362,7 +362,7 @@ def get_posts_by_room(room_id):
                     posts.id,
                     posts.user_id,
                     posts.room_id,
-                    posts.contents,
+                    posts.content,
                     posts.created_at,
                     users.name AS user_name
                 FROM posts
@@ -386,7 +386,7 @@ def create_post(user_id, room_id, content):
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO posts (user_id, room_id, contents)
+                INSERT INTO posts (user_id, room_id, content)
                 VALUES (%s, %s, %s)
                 """,
                 (user_id, room_id, content),
@@ -432,7 +432,7 @@ def update_post(post_id, user_id, content):
             cur.execute(
                 """
                 UPDATE posts
-                SET contents = %s
+                SET content = %s
                 WHERE id = %s AND user_id = %s
                 """,
                 (content, post_id, user_id),
