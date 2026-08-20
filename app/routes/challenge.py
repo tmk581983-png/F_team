@@ -34,7 +34,7 @@ def room(room_id):
     sql = """
     SELECT
     u.name,
-    p.contents
+    p.content
     FROM room_participations AS rp
 
     JOIN users AS u

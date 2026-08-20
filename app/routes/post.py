@@ -93,7 +93,7 @@ def to_view_posts(rows, reactions, replies):
     for row in replies:
         reply_map.setdefault(row["parent_post_id"], []).append({
             "user_name": row["user_name"],
-            "content": row["contents"],
+            "content": row["content"],
             "created_at": row["created_at"].strftime("%Y-%m-%d %H:%M"),
         })
 
@@ -117,7 +117,7 @@ def to_view_posts(rows, reactions, replies):
         posts.append({
             "id": post_id,
             "user_name": row["user_name"],
-            "content": row["contents"],
+            "content": row["content"],
             "created_at": row["created_at"].strftime("%Y-%m-%d %H:%M"),
             "is_mine": row["user_id"] == CURRENT_USER_ID,
             "reactions": reactions_view,
