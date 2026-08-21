@@ -9,32 +9,31 @@ a {
 }
 
 body {
-  background-color: white;
+  font-family: var(--font-family);
+  color: var(--text-color);
+  background-color: var(--bg-color);
 }
 
 .room-list {
   width: 100%;
   max-width: 800px;
-  margin: 180px auto;
+  margin: 148px auto;
   padding: 0 12px;
 }
 
-.page-title {
-  font-size: 32px;
-  margin-left: 8px;
-  margin-bottom: 40px;
+.notice {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 500;
+  color: rgb(146, 99, 99);
+  border-radius: var(--radius);
+  margin-bottom: 32px;
 }
 
 .room-selection {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.card {
-  background-color: rgb(250, 250, 253);
-  border: 1px solid rgb(231, 233, 235);
-  border-radius: 12px;
 }
 
 input[type="radio"] {
@@ -46,18 +45,19 @@ input[type="radio"] {
   justify-content: space-between;
   align-items: center;
   font-size: 20px;
-  border: 1px solid #ccc;
-  border-radius: 12px;
+  background-color: var(--card-color);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius);
   padding: 16px;
 }
 
 input[type="radio"]:checked + .room-card {
-  border: 1px solid blue;
-  background: #eef;
+  background-color: rgb(238, 238, 255);
+  border: 2px solid rgb(0, 0, 255);
 }
 
 .enter-room-container {
-  margin: 32px 0px 20px 0px;
+  margin-top: 32px;
 }
 
 .enter-room-button {
@@ -67,13 +67,13 @@ input[type="radio"]:checked + .room-card {
   width: 100%;
   height: 48px;
   color: white;
-  font-size: 16px;
+  font-size: var(--font-size);
   font-weight: bold;
   border: none;
-  background-color: rgb(43, 143, 103);
-  border-radius: 8px;
+  background-color: var(--main-color);
+  border-radius: var(--radius-btn);
 }
 
 .enter-room-button:hover {
-  background-color: rgb(36, 122, 88);
+  background-color: var(--main-color-dark);
 }
