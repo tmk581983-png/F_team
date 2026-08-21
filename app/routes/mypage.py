@@ -14,9 +14,11 @@ mypage_bp = Blueprint("mypage", __name__, url_prefix="/mypage")
 @mypage_bp.route("/", methods=["GET"])
 def index():
     """マイページを表示する"""
-    # TODO: セッション実装後にsession["user_id"]を使用する
-    # user_id = session["user_id"]
-    user_id = 1
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        return redirect(url_for("login.login"))
+
     user = get_mypage_user(user_id)
     achievement_data = get_achievement_count(user_id)
     posted_days = get_posted_days(user_id)
@@ -27,7 +29,7 @@ def index():
         "mypage.html",
         user=user,
         achievement_data=achievement_data,
-        activity_data = activity_data,
+        activity_data=activity_data,
         joined_room=joined_room,
     )
 
@@ -35,9 +37,11 @@ def index():
 @mypage_bp.route("/update", methods=["POST"])
 def update():
     """プロフィール情報を更新する"""
-    # TODO: セッション実装後にsession["user_id"]を使用する
-    # user_id = session["user_id"]
-    user_id = 1
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        return redirect(url_for("login.login"))
+
     name = request.form["name"]
 
     update_mypage_user(user_id, name)
@@ -49,6 +53,7 @@ def update():
 def logout():
     """ログイン情報を破棄してログアウトする"""
     session.clear()
+
     return redirect(url_for("login.login"))
 
 

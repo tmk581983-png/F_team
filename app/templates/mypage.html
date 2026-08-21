@@ -14,7 +14,6 @@
 
     <h2 class="page-title">マイページ</h2>
 
-
     <div class="mypage-main">
       <div class="card">
         <div class="profile">
@@ -25,7 +24,7 @@
           <div class="profile-detail">
             <div class="profile-top">
               <p>{{ user.name }}</p>
-              <button>アカウント管理</button>
+              <button type="button" id="openButton">アカウント管理</button>
             </div>
 
             <div class="profile-bottom">
@@ -48,7 +47,7 @@
         <div class="card">
           <div class="room-detail">
             <h4>{{ joined_room.name }}</h4>
-            <p class="participant-count">参加中：{{ joined_room.member_count }}人</p>
+            <p class="participant-count">参加者：{{ joined_room.member_count }}名</p>
           </div>
         </div>
         
