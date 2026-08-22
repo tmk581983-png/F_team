@@ -1,30 +1,42 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, session, request, redirect, url_for
+from models.room_list import (
+    get_room_lists,
+    create_room_participation,
+)
+from models.mypage import get_joined_room
 
 room_list_bp = Blueprint("room_list", __name__, url_prefix="/room_list")
 
 
 @room_list_bp.route("/", methods=["GET"])
 def index():
+    """チャレンジルーム一覧を取得する"""
+    user_id = session.get("user_id")
 
-    # TODO: DBから取得したルーム一覧に置き換える
-    rooms = [
-        {"id": "1", "name": "目指せ！150ステップクリア！", "member_count": "10"},
-        {"id": "2", "name": "ネットワークわけわからん", "member_count": "5"},
-        {"id": "3", "name": "Linuxコマンド乱れ打ち", "member_count": "8"},
-        {"id": "4", "name": "言語化してみる", "member_count": "3"},
-        {"id": "5", "name": "一休み一休み", "member_count": "7"},
-    ]
+    if user_id is None:
+        return redirect(url_for("login.login"))
 
-    return render_template(
-        "room_list.html",
-        rooms=rooms,
-    )
+    rooms = get_room_lists()
+
+    return render_template("room_list.html", rooms=rooms)
 
 
 @room_list_bp.route("/register", methods=["POST"])
 def register():
+    """ルーム参加処理を行う"""
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        return redirect(url_for("login.login"))
+
+    # 直接アクセスによる複数ルーム参加を防止
+    joined_room = get_joined_room(user_id)
+
+    if joined_room:
+        return redirect(url_for("mypage.index"))
+
     room_id = int(request.form["room_id"])
 
-    # TODO: room_participationsへuser_idとroom_idを保存する
+    create_room_participation(user_id, room_id)
 
-    return redirect(url_for("mypage.index"))
+    return redirect(url_for("challenge.room", room_id=room_id))
