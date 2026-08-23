@@ -1,7 +1,7 @@
 """
 投稿画面の処理
 
-【R8.8.16 更新】
+【R8.8.16】
 postsテーブルへDB接続
 一覧の取得・投稿・削除・編集はmodels/post.py経由
 チャレンジルームの一覧もroomsテーブルから取得するようにした。
@@ -92,9 +92,11 @@ def to_view_posts(rows, reactions, replies):
     reply_map = {}
     for row in replies:
         reply_map.setdefault(row["parent_post_id"], []).append({
+            "id": row["id"],
             "user_name": row["user_name"],
             "content": row["content"],
             "created_at": row["created_at"].strftime("%Y-%m-%d %H:%M"),
+            "is_mine": row["user_id"] == CURRENT_USER_ID,
         })
 
     posts = []
