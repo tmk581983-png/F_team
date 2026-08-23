@@ -98,8 +98,9 @@ def find_room_name(rooms, room_id):
     return ""
 
 
-def to_view_posts(rows, reactions, replies):
+def to_view_posts(user_id, rows, reactions, replies):
     """
+    user_id：今ログインしているユーザーのID（is_mineの判定に使う）
     rows：get_posts_view_data() で取得した投稿
     reactions：get_posts_view_data() で取得したリアクション
     replies：get_posts_view_data() で取得した返信
@@ -126,7 +127,7 @@ def to_view_posts(rows, reactions, replies):
             "user_name": row["user_name"],
             "content": row["content"],
             "created_at": row["created_at"].strftime("%Y-%m-%d %H:%M"),
-            "is_mine": row["user_id"] == CURRENT_USER_ID,
+            "is_mine": row["user_id"] == user_id,
         })
 
     posts = []
@@ -152,7 +153,7 @@ def to_view_posts(rows, reactions, replies):
             "content": row["content"],
             "image_path": row["image_path"],
             "created_at": row["created_at"].strftime("%Y-%m-%d %H:%M"),
-            "is_mine": row["user_id"] == CURRENT_USER_ID,
+            "is_mine": row["user_id"] == user_id,
             "reactions": reactions_view,
             "replies": reply_map.get(post_id, []),
         })
@@ -165,31 +166,36 @@ def to_view_posts(rows, reactions, replies):
 @post_bp.route("/posts", methods=["GET"])
 def posts_view():
     #ブラウザで/postsを開いたとき（GET）に投稿ページを表示
+    user_id = CURRENT_USER_ID
 
     # どのルームを見たいのか、指定があれば先に受け取る
     # アドレスの「?room_id=1」の部分を読み取り
     # type=int を付けると、文字の1ではなく数値の1で受け取れる
     room_id = request.args.get("room_id", type=int)
 
+    # 【変更】room_id未指定時にどのルームを表示するか判定するため、
+    # 登録ルームの確認をここに前倒しした（元は下の方で取得していた）
+    joined_room_id = get_joined_room_id(user_id)
+
     # ルーム一覧・投稿・リアクション・返信を、1回の接続でまとめて取得
     # room_id がNoneの場合、投稿は取得されない
-    rooms, post_rows, reaction_rows, reply_rows = get_posts_view_data(CURRENT_USER_ID, room_id)
+    rooms, post_rows, reaction_rows, reply_rows = get_posts_view_data(user_id, room_id)
 
-    # 定が無かった場合は、いちばん上のルームを表示
-    # このときはroom_idで問い合わせし直す
+    # 指定が無かった場合の表示先を決める
+    # 【変更】challenge_room画面などroom_idを付けずに遷移してきたとき、
+    # 以前は常に「一覧の先頭のルーム」を表示していたが、
+    # それだと自分の登録ルームと違うルームが表示されることがあったため、
+    # 登録中のルームがあればそれを優先して表示するようにした
     # ルームが1件も無いときはNoneのままにして、下でDBを引かないようにする
     if room_id is None:
-        room_id = rooms[0]["id"] if rooms else None
+        room_id = joined_room_id if joined_room_id is not None else (rooms[0]["id"] if rooms else None)
         if room_id is not None:
-            rooms, post_rows, reaction_rows, reply_rows = get_posts_view_data(CURRENT_USER_ID, room_id)
+            rooms, post_rows, reaction_rows, reply_rows = get_posts_view_data(user_id, room_id)
 
-    posts = to_view_posts(post_rows, reaction_rows, reply_rows)
+    posts = to_view_posts(user_id, post_rows, reaction_rows, reply_rows)
 
     # 編集中の投稿があるか
     edit_id = request.args.get("edit_id", type=int)
-
-    # 登録ルームの確認、投稿できるか、マイページへ戻れるか
-    joined_room_id = get_joined_room_id(CURRENT_USER_ID)
 
     # 登録中のルームを見ているときだけ、投稿フォームを表示
     # リアクションは対象外（登録ルーム以外でも応援はできる）。
@@ -202,7 +208,7 @@ def posts_view():
     if joined_room_id is None:
         posted = True
     else:
-        posted = has_posted_today(CURRENT_USER_ID, joined_room_id)
+        posted = has_posted_today(user_id, joined_room_id)
 
     # 卒業ポップアップを出すか
     # create_post() が、3日連続を達成した投稿のときだけgraduated=1
@@ -230,6 +236,7 @@ def create_post():
     2. DBのpostsテーブルに保存
     3. 投稿画面に戻る
     """
+    user_id = CURRENT_USER_ID
 
     # request.formは「フォームから送られてきた値」を受け取る
     # どのルームへの投稿かは、HTMLのhidden項目
@@ -238,7 +245,7 @@ def create_post():
 
     # 登録中のルーム以外への投稿は受け付けない。
     # 画面側でフォームを隠しているが、直接POSTを送られたときに防げないため、ここでも確認
-    if room_id != get_joined_room_id(CURRENT_USER_ID):
+    if room_id != get_joined_room_id(user_id):
         return redirect(url_for("post.posts_view", room_id=room_id))
 
     # .strip()で前後の余分な空白や改行を取り除く
@@ -250,9 +257,9 @@ def create_post():
     # 空・スペースだけの投稿はDBに保存しない
     graduated = False
     if content != "" and room_id is not None:
-        db_create_post(CURRENT_USER_ID, room_id, content, image_path)
+        db_create_post(user_id, room_id, content, image_path)
         # 投稿したときだけ、連続日数の判定
-        graduated = update_streak_and_check_graduation(CURRENT_USER_ID, room_id)
+        graduated = update_streak_and_check_graduation(user_id, room_id)
 
     # 投稿画面に戻る（卒業したらgraduated=1でポップアップ表示）
     return redirect(
@@ -270,11 +277,12 @@ def delete_post(post_id):
     ※ 自分の投稿でなければ、models側のWHERE条件に一致しないため、
        何も削除されずに終わる。アドレスを直接打たれても安全。
     """
+    user_id = CURRENT_USER_ID
 
     # どのルームか受け取る（戻り先の画面を決めるため）
     room_id = request.form.get("room_id", type=int)
 
-    db_delete_post(post_id, CURRENT_USER_ID)
+    db_delete_post(post_id, user_id)
 
     # 投稿画面に戻る
     return redirect(url_for("post.posts_view", room_id=room_id))
@@ -287,6 +295,7 @@ def edit_post(post_id):
     2. DB側で「自分の投稿かどうか」を確認しつつ書きかえる（models/post.py内）
     3. 投稿画面に戻る（編集フォームは閉じる）
     """
+    user_id = CURRENT_USER_ID
 
     # どのルームか（戻り先）
     room_id = request.form.get("room_id", type=int)
@@ -299,7 +308,7 @@ def edit_post(post_id):
 
     # 空の内容で保存されるのを防ぐ
     if new_content != "":
-        db_update_post(post_id, CURRENT_USER_ID, new_content, image_path)
+        db_update_post(post_id, user_id, new_content, image_path)
 
     # 投稿画面に戻る
     return redirect(url_for("post.posts_view", room_id=room_id))
@@ -312,13 +321,15 @@ def react(post_id):
     自分の投稿には押せない、という確認はmodels側で行っている
     リアクションは、登録していないチャレンジルームでも可能。
     """
+    user_id = CURRENT_USER_ID
+
     room_id = request.form.get("room_id", type=int)
     reaction_type = request.form.get("reaction_type", type=int)
 
     # 想定外の番号のときは、何もしない
     valid_types = [rt["type"] for rt in REACTION_TYPES]
     if reaction_type in valid_types:
-        toggle_reaction(CURRENT_USER_ID, post_id, reaction_type)
+        toggle_reaction(user_id, post_id, reaction_type)
 
     # 投稿画面に戻る
     return redirect(url_for("post.posts_view", room_id=room_id))
@@ -327,10 +338,12 @@ def react(post_id):
 @post_bp.route("/posts/<int:post_id>/reply", methods=["POST"])
 def reply_post(post_id):
     # 返信ボタンが押されたとき（POST）の処理
+    user_id = CURRENT_USER_ID
+
     room_id = request.form.get("room_id", type=int)
     content = request.form.get("content", "").strip()
 
     if content != "" and room_id is not None:
-        create_reply(CURRENT_USER_ID, room_id, post_id, content)
+        create_reply(user_id, room_id, post_id, content)
 
     return redirect(url_for("post.posts_view", room_id=room_id))
