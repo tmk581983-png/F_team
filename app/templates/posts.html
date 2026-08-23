@@ -114,7 +114,7 @@
 
         {% if post.is_mine %}
         {# 自分の投稿。件数は見えるが押せない #}
-        <span class="action disabled">{{ r.emoji }} {{ r.label }} {{ r.count }}</span>
+        <span class="action disabled">{{ r.emoji }}  {{ r.count }}</span>
 
         {% else %}
         {# 他人の投稿 #}
@@ -126,7 +126,7 @@
 
           {# 自分が押下後は色を変える #}
           <button type="submit" class="action {% if r.active %}action-active{% endif %}">
-            {{ r.emoji }} {{ r.label }} {{ r.count }}
+            {{ r.emoji }}  {{ r.count }}
           </button>
         </form>
         {% endif %}
@@ -166,9 +166,21 @@
       {% if post.replies %}
       <div class="replies">
         {% for reply in post.replies %}
-        <p class="reply">
-          <span class="reply-user">{{ reply.user_name }}</span>：{{ reply.content }}
-        </p>
+        <div class="reply">
+          <p class="reply-body">
+            <span class="reply-user">{{ reply.user_name }}</span>：{{ reply.content }}
+          </p>
+          {# 自分の返信にだけ削除ボタンを表示。
+             サーバー側（delete_post）でも user_id を確認しているため、
+             他人の返信は削除できない #}
+          {% if reply.is_mine %}
+          <form action="{{ url_for('post.delete_post', post_id=reply.id) }}" method="post" class="reply-delete-form">
+            <input type="hidden" name="room_id" value="{{ room_id }}">
+            <button type="submit" class="reply-delete"
+                    onclick="return confirm('この返信を削除しますか？');">削除</button>
+          </form>
+          {% endif %}
+        </div>
         {% endfor %}
       </div>
       {% endif %}

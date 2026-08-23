@@ -13,13 +13,6 @@ body {
   margin: 0;
   padding: 0;
   background-color: var(--bg-color);
-  background-image:
-    linear-gradient(rgba(244, 244, 244, 0.88), rgba(244, 244, 244, 0.88)),
-    url("/static/images/bouzu.png");
-  background-repeat: no-repeat, repeat;
-  background-position: center, center;
-  background-size: cover, 330px auto;     /* 画像の大きさ（横110px） */
-  background-attachment: fixed, fixed;    /* スクロールしても背景は動かない */
 
   font-family: var(--font-family);
   color: var(--text-color);
@@ -67,8 +60,8 @@ body {
 /* 「投稿すると押せるようになります」の注意書き */
 .back-note {
   margin-left: 8px;
-  font-size: 11px;
-  color: var(--text-muted);
+  font-size: 13px;
+  color: var(--danger-color);
 }
 
 .back-link:hover {
@@ -235,9 +228,34 @@ body {
 }
 
 .reply {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
   margin: 6px 0;
+}
+
+.reply-body {
   font-size: 13px;
   color: var(--text-muted);
+}
+
+.reply-delete {
+  border: none;
+  background: none;
+  font-size: 11px;
+  color: var(--danger-color);
+  cursor: pointer;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.reply-delete:hover {
+  text-decoration: underline;
+}
+
+.reply-delete-form {
+  margin: 0;
 }
 
 .reply-user {
