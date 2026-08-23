@@ -111,6 +111,7 @@ body {
 .error-popup-content p {
   margin: 0 0 20px;
   font-size: 16px;
+  color: #d32f2f;
 }
 
 .error-popup-content button {
