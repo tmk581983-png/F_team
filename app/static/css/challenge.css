@@ -18,8 +18,13 @@ body{
 main{
   width: 100%;
   max-width: 640px;
-  margin:0;
+  margin:0 auto;
   padding: var(--spacing) var(--spacing) 40px;
+  
+}
+
+.challenge_card{
+  padding: var(--spacing);
   background-color: var(--card-color);
   border-radius: var(--radius);
 }
@@ -63,7 +68,8 @@ h2{
   border:2px solid rgb(45, 200, 231);
   color: rgb(45, 200, 231);
   border-radius: var(--radius);
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
   height: 36px;
   font-size: 24px;
   
@@ -78,7 +84,8 @@ h2{
   justify-content: center;
   align-items: center;
   border-radius: var(--radius);
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
   height: 36px;
   background-color: var(--main-color);
   color: white;
@@ -90,25 +97,31 @@ button:hover {
 }
 
 .post_lists{
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
 
 .post_list{
-  display: grid;
-  grid-template-columns: 3fr 7fr;
+  /* display: grid;
+  grid-template-columns: 3fr 7fr; */
+  display:flex;
+  flex-wrap: wrap;
   border: 1px solid rgb(185, 195, 247,0.3);
   padding: 10px;
   border-radius: var(--radius);
 }
 
 .user-name{
+  flex-basis: 150px;
   text-align: center;
 }
 
 .user-content{
+  flex: 1;
+  min-width: 200px;
   text-align: left;
 }
 
@@ -125,15 +138,15 @@ button:hover {
   border-radius: var(--radius);
   width: 500px;
   height: 36px;
-  background-color: rgb(150, 234, 31);
-  color: black;
+  background-color: var(--main-color);
+  color: white;
   text-decoration: none;
   margin-top: 10px;
 }
 
 .result_report:hover{
   cursor:pointer;
-  background-color: rgb(128, 183, 51)
+  background-color: var(--main-color-dark);
 }
 
 .disabled{
