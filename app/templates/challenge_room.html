@@ -12,7 +12,7 @@
         <h2>{{ room_name }}</h2>   
         <a href="{{ url_for('mypage.index')}}" class="back-btn" id="back-button">戻る</a>
       </div>
-      <p class="challenge_header">参加人数 : {{ users|length}}人</p>
+      <p class="challenge_header">参加者 : {{ users|length}}名</p>
       <div class="set-timebox">
         <div class="set-time" id="setTime">00:00<span>/10:00</span></div>
           <div class="post_lists">
@@ -21,8 +21,8 @@
                 
                 <span class="user-name">{{ user.name }}</span>
                 <span class="user-content">
-                {% if user.contents %}
-                  {{ user.contents }}
+                {% if user.content %}
+                  {{ user.content }}
                 {% else %}
                    投稿データなし
                 {% endif %}
@@ -37,9 +37,9 @@
       </div>
 
       <div class="result-box">
-        <a href="{{ url_for('post.posts_view')}}" class="result_report disabled" id="resultReport" >達成報告</a>
+        <a href="{{ url_for('post.posts_view')}}" class="result_report disabled" id="resultReport" >10分後、投稿可能</a>
       </div>
-      <p class="memo">※学習10分経過後、有効になります</p>
+      <!-- <p class="memo">※学習10分経過後、有効になります</p> -->
     </main>
 
 

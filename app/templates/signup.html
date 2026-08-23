@@ -16,7 +16,18 @@
             <h1>新規登録</h1>
 
             {% if error %}
-             <p>{{ error }}</p>
+            <div class="error-popup" id="errorPopup">
+                <div class="error-popup-content">
+                    <p>{{ error }}</p>
+                    <button type="button" onclick="closeErrorPopup()">OK</button>
+                </div>
+            </div>
+
+            <script>
+                function closeErrorPopup() {
+                    document.getElementById("errorPopup").style.display = "none";
+                }
+            </script>
             {% endif %}
             
 
@@ -72,3 +83,4 @@
         </section>
     </main>
 {% endblock %}
+

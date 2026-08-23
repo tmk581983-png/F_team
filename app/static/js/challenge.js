@@ -31,7 +31,7 @@ function countUp() {
 
   if (studytime >= 5000) {
       resultReport.classList.remove("disabled");
-      resultReport.textContent="投稿できます"
+      resultReport.textContent="チャレンジ達成!!"
   }
 // 画面更新のたびにcountUpを実行してという指示
   requestAnimationFrame(countUp);
