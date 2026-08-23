@@ -131,13 +131,18 @@ button:hover {
   margin-top: 10px;
 }
 
+.result_report:hover{
+  cursor:pointer;
+  background-color: rgb(128, 183, 51)
+}
+
 .disabled{
   pointer-events: none;
   opacity: 0.5;
   cursor:not-allowed;
 }
 
-.memo{
+/* .memo{
   text-align: center;
   margin-top: 5px;
-}
+} */

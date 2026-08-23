@@ -1,72 +1,68 @@
-from flask import Flask,render_template,Blueprint
+from flask import Flask,render_template,Blueprint,session, redirect, url_for
 from utils.db import get_connection
 
 challenge_bp = Blueprint("challenge",__name__, url_prefix="/challenge")
 
 @challenge_bp.route("/room/<int:room_id>")
 def room(room_id):
-    if room_id == 1 :
-      room_name="目指せ!150ステップ!"
 
-    elif room_id == 2 :
-       room_name="いくぜ!ステップ200~!!"
+   user_id = session.get("user_id")
+   if user_id is None:
+      return redirect(url_for("login.login"))
+   
 
-    elif room_id == 3 :
-       room_name="ネットワークを極めたい!"
+   conn = get_connection()
+   cursor = conn.cursor()
 
-    elif room_id == 4 :
-       room_name="Linux王に俺はなる!"
+   try:
+      room_sql = """SELECT name FROM rooms WHERE id = %s ;"""
+      cursor.execute(room_sql, (room_id,))
+      room = cursor.fetchone()
 
-    elif room_id == 5 :
-       room_name="言語化を制すものは!"
+      if room is None:
+         return "Room not found", 404
 
+      room_name = room["name"]
 
-    elif room_id == 6 :
-       room_name="休ませてくれ・・"
-       
-    else :
-       return "Room not found", 404
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-   # 現在の参加者を探す→各参加者の最新日時を探す→その日時の投稿を特定
-    sql = """
-    SELECT
-    u.name,
-    p.content
-    FROM room_participations AS rp
-
-    JOIN users AS u
-      ON rp.user_id = u.id
-
-    LEFT JOIN (
+      # 現在の参加者を探す→各参加者の最新日時を探す→その日時の投稿を特定
+      sql = """
       SELECT
-         user_id,
-         room_id,
-         MAX(created_at) AS latest_created_at
-      FROM posts
-      GROUP BY user_id, room_id
-    ) AS lp
-      ON rp.user_id = lp.user_id
-      AND rp.room_id = lp.room_id
+      u.name,
+      p.content
+      FROM room_participations AS rp
 
-    LEFT JOIN posts AS p
-      ON rp.user_id = p.user_id
-      AND rp.room_id = p.room_id
-      AND p.created_at = lp.latest_created_at
+      JOIN users AS u
+         ON rp.user_id = u.id
 
-    WHERE rp.room_id = %s
-    AND rp.graduated_at IS NULL;
-    """
-    
-    cursor.execute(sql, (room_id,))
-    users = cursor.fetchall()
-    cursor.close()
-    conn.close()
+      LEFT JOIN (
+         SELECT
+            user_id,
+            room_id,
+            MAX(created_at) AS latest_created_at
+         FROM posts
+         WHERE deleted_at IS NULL
+         GROUP BY user_id, room_id
+      ) AS lp
+         ON rp.user_id = lp.user_id
+         AND rp.room_id = lp.room_id
 
-    return render_template("challenge_room.html",room_name=room_name, users=users)
-     
+      LEFT JOIN posts AS p
+         ON rp.user_id = p.user_id
+         AND rp.room_id = p.room_id
+         AND p.created_at = lp.latest_created_at
+
+      WHERE rp.room_id = %s
+      AND rp.graduated_at IS NULL;
+      """
+      
+      cursor.execute(sql, (room_id,))
+      users = cursor.fetchall()
+   finally:
+      cursor.close()
+      conn.close()
+
+   return render_template("challenge_room.html",room_name=room_name, users=users)
+   
 
 @challenge_bp.route("/result")
 def result():
