@@ -43,6 +43,7 @@ CREATE TABLE posts (
   room_id BIGINT UNSIGNED NOT NULL,
   parent_post_id BIGINT UNSIGNED,  -- 投稿画面の返信用に追加
   content VARCHAR(255) NOT NULL,
+  image_path VARCHAR(255),  -- 添付画像のファイル名（任意）
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   deleted_at DATETIME,

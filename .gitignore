@@ -11,3 +11,7 @@ venv/
 # Pythonの実行キャッシュ
 __pycache__/
 *.pyc
+
+# 投稿の添付画像（各自の環境でアップロードされる画像データ）
+app/static/uploads/*
+!app/static/uploads/.gitkeep

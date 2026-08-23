@@ -15,7 +15,10 @@ postsテーブルへDB接続
 #   request        … ブラウザから送られてきた値（リクエスト）
 #   redirect       … 別のページへ移動
 #   url_for        … エンドポイントのURLを利用
-from flask import Blueprint, render_template, request, redirect, url_for
+import os
+import uuid
+
+from flask import Blueprint, render_template, request, redirect, url_for, current_app
 
 from models.post import (
     get_posts_view_data,
@@ -46,6 +49,33 @@ REACTION_TYPES = [
     {"type": 2, "label": "すごい！", "emoji": "🎉"},
     {"type": 3, "label": "共感！",   "emoji": "🤝"},
 ]
+
+# 添付画像として許可する拡張子
+ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+
+
+def save_image(file):
+    """アップロードされた画像をstatic/uploadsに保存し、保存したファイル名を返す
+    画像が選択されていない、または対象外の拡張子のときはNoneを返す
+
+    ファイル名はそのまま使わずランダムな名前に変更している
+    （他人のファイル名との衝突・上書き事故を防ぐため）
+    """
+    if file is None or file.filename == "":
+        return None
+
+    if "." not in file.filename:
+        return None
+
+    ext = file.filename.rsplit(".", 1)[1].lower()
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        return None
+
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    upload_dir = os.path.join(current_app.static_folder, "uploads")
+    os.makedirs(upload_dir, exist_ok=True)
+    file.save(os.path.join(upload_dir, filename))
+    return filename
 
 
 # ============================================================
@@ -120,6 +150,7 @@ def to_view_posts(rows, reactions, replies):
             "id": post_id,
             "user_name": row["user_name"],
             "content": row["content"],
+            "image_path": row["image_path"],
             "created_at": row["created_at"].strftime("%Y-%m-%d %H:%M"),
             "is_mine": row["user_id"] == CURRENT_USER_ID,
             "reactions": reactions_view,
@@ -213,10 +244,13 @@ def create_post():
     # .strip()で前後の余分な空白や改行を取り除く
     content = request.form.get("content", "").strip()
 
+    # 添付画像（無ければNone）
+    image_path = save_image(request.files.get("image"))
+
     # 空・スペースだけの投稿はDBに保存しない
     graduated = False
     if content != "" and room_id is not None:
-        db_create_post(CURRENT_USER_ID, room_id, content)
+        db_create_post(CURRENT_USER_ID, room_id, content, image_path)
         # 投稿したときだけ、連続日数の判定
         graduated = update_streak_and_check_graduation(CURRENT_USER_ID, room_id)
 
@@ -260,9 +294,12 @@ def edit_post(post_id):
     # 書きかえ後の本文を受け取る
     new_content = request.form.get("content", "").strip()
 
+    # 新しい画像が送られてきたときだけ差しかえる（無ければNoneのまま＝既存画像を維持）
+    image_path = save_image(request.files.get("image"))
+
     # 空の内容で保存されるのを防ぐ
     if new_content != "":
-        db_update_post(post_id, CURRENT_USER_ID, new_content)
+        db_update_post(post_id, CURRENT_USER_ID, new_content, image_path)
 
     # 投稿画面に戻る
     return redirect(url_for("post.posts_view", room_id=room_id))

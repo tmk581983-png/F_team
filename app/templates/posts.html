@@ -91,9 +91,11 @@
           「編集」を押した投稿だけ、本文の代わりに編集フォームを出す。
            post.id == edit_id で編集中か判定 #}
       {% if post.is_mine and post.id == edit_id %}
-      <form class="edit-form" action="{{ url_for('post.edit_post', post_id=post.id) }}" method="post">
+      <form class="edit-form" action="{{ url_for('post.edit_post', post_id=post.id) }}" method="post" enctype="multipart/form-data">
         <input type="hidden" name="room_id" value="{{ room_id }}">
         <textarea name="content" rows="3">{{ post.content }}</textarea>
+        {# 画像は任意添付（3MBまで）。選び直さなければ今の画像のまま #}
+        <input type="file" name="image" accept="image/*">
         <div class="edit-form-footer">
           {# キャンセル：edit_idを付けずに同じページへ戻る＝フォームを閉じる #}
           <a class="action" href="{{ url_for('post.posts_view', room_id=room_id) }}">キャンセル</a>
@@ -102,6 +104,10 @@
       </form>
       {% else %}
       <p class="post-body">{{ post.content }}</p>
+      {% if post.image_path %}
+      <img class="post-image" src="{{ url_for('static', filename='uploads/' + post.image_path) }}" alt="投稿画像"
+           onclick="openImagePreview(this.src)">
+      {% endif %}
       {% endif %}
 
       {# ボタンの並び #}
@@ -118,7 +124,7 @@
 
         {% else %}
         {# 他人の投稿 #}
-        <form action="{{ url_for('post.react', post_id=post.id) }}" method="post">
+        <form class="reaction-form" action="{{ url_for('post.react', post_id=post.id) }}" method="post">
 
           {# どのルームを見ているか、どの種類を押したか #}
           <input type="hidden" name="room_id" value="{{ room_id }}">
@@ -210,7 +216,7 @@
      ============================================================ #}
   {% if can_post %}
   <section class="new-post">
-    <form action="{{ url_for('post.create_post') }}" method="post">
+    <form class="new-post-form" action="{{ url_for('post.create_post') }}" method="post" enctype="multipart/form-data">
 
       {# どのルームを見ているか一緒に送る。
          type="hidden"なので画面に表示されない #}
@@ -219,6 +225,9 @@
       {# name="content" が、Python 側で request.form.get("content") として
          受け取るときの名前。投稿テンプレートの役目 #}
       <textarea name="content" rows="3" placeholder="ステップ数や勉強時間、学んだ内容などを一言書いてみましょう"></textarea>
+
+      {# 画像は任意添付（3MBまで） #}
+      <input type="file" name="image" accept="image/*">
 
       <div class="new-post-footer">
         <button type="submit" class="btn-post">投稿</button>
@@ -241,7 +250,7 @@
     <div class="graduation-dialog-body">
       <p class="graduation-title">チャレンジルーム卒業です！</p>
       <p class="graduation-message">
-        おめでとうございます！<br>
+        🎊<span class="graduation-highlight">おめでとうございます！</span> 🎉<br>
         3日連続で投稿を達成しました。<br>
         マイページから新しいチャレンジルームを登録してください。
       </p>
@@ -253,7 +262,7 @@
     </div>
   </dialog>
   <script>
-    // ページを開いた瞬間に、モーダルとして開く。
+    // ページを開いた瞬間に、モーダルとして開く
     // open属性だけでは「背景を暗くする」「他の操作をブロックする」という動きにならないため、JavaScriptで開く。
     const graduationDialog = document.getElementById('graduation-dialog');
     graduationDialog.showModal();
@@ -264,6 +273,49 @@
     });
   </script>
   {% endif %}
+
+<dialog id="image-preview-dialog" class="image-preview-dialog">
+  <button type="button" class="image-preview-close"
+          onclick="document.getElementById('image-preview-dialog').close()">✕</button>
+  <img id="image-preview-img" src="" alt="拡大画像">
+</dialog>
+
+<script>
+  // ページを開いた直後、保存しておいたスクロール位置があれば元に戻す
+  const savedScroll = sessionStorage.getItem('postsScrollY');
+  if (savedScroll !== null) {
+    window.scrollTo(0, parseInt(savedScroll, 10));
+    sessionStorage.removeItem('postsScrollY');
+  }
+
+  // リアクションボタンを押した瞬間のスクロール位置を保存
+  document.querySelectorAll('.reaction-form').forEach((form) => {
+    form.addEventListener('submit', () => {
+      sessionStorage.setItem('postsScrollY', window.scrollY);
+    });
+  });
+
+// 投稿ボタンの連打防止（送信した瞬間は投稿ボタンを非活性化）
+document.querySelectorAll('.new-post-form').forEach((form) => {
+  form.addEventListener('submit', () => {
+    form.querySelector('button[type="submit"]').disabled = true;
+  });
+});
+
+// 投稿画像のプレビュー表示
+function openImagePreview(src) {
+  document.getElementById('image-preview-img').src = src;
+  document.getElementById('image-preview-dialog').showModal();
+}
+
+// 画像の外側（背景）をクリックしたら閉じる
+document.getElementById('image-preview-dialog').addEventListener('click', (event) => {
+  if (event.target.id === 'image-preview-dialog') {
+    event.target.close();
+  }
+});
+
+</script>
 
 </div>
 {% endblock %}
