@@ -161,7 +161,7 @@ def update_streak_and_check_graduation(user_id, room_id):
 
 def get_posts_view_data(user_id, room_id):
     """投稿画面の表示に必要なデータを、1回の接続でまとめて取得
-    ルーム一覧、投稿、リアクションを別々の関数で呼ぶと接続3回となり接続確立に時間がかかる
+    ルーム一覧、投稿、リアクションを別々の関数で呼ぶと接続3回となり接続に時間がかかる
     """
     conn = get_connection()
     try:
@@ -219,6 +219,7 @@ def get_posts_view_data(user_id, room_id):
                     SELECT
                         replies.id,
                         replies.parent_post_id,
+                        replies.user_id,
                         replies.content,
                         replies.created_at,
                         users.name AS user_name
@@ -270,7 +271,7 @@ def get_reactions_by_room(user_id, room_id):
     """投稿が件数分DBへの問い合わせも発生する
     GROUP BYなら1回の問い合わせで集計できる
 
-    SUM(reactions.user_id = %s) について
+    SUM(reactions.user_id = %s) は
     MySQLで条件式が真=1、偽=0になり
     それを合計すると「自分が押した件数」になる
     UNIQUE制約があるので、結果は必ず0か1
@@ -298,9 +299,9 @@ def get_reactions_by_room(user_id, room_id):
 
 
 def toggle_reaction(user_id, post_id, reaction_type):
-    """リアクションを押す／取り消す
+    """リアクション
     自分の投稿でないか確認（自分の投稿は押せない）
-    画面側でもボタンを押せないようにしているが、それだけでは
+    画面でもボタンを押せないようにしているが、それだけでは
     アドレスを直接叩かれたときに防げないのでサーバー側でも確認
     """
     conn = get_connection()
@@ -317,7 +318,7 @@ def toggle_reaction(user_id, post_id, reaction_type):
             if post is None or post["user_id"] == user_id:
                 return
 
-            # すでに押しているか調べる
+            # すでに押しているか
             cur.execute(
                 """
                 SELECT id FROM reactions
@@ -344,7 +345,7 @@ def toggle_reaction(user_id, post_id, reaction_type):
 
 
 def get_posts_by_room(room_id):
-    """指定したルームの投稿を、新しい順に取得する
+    """指定したルームの投稿を、新しい順に取得
     room_id が一致し、かつdeleted_at がNULL（＝削除されていない）を
     created_at（投稿日時）の新しい順に取り出す。
     posts テーブルには投稿者の「名前」がなく、user_idしかないので、
@@ -398,13 +399,11 @@ def create_post(user_id, room_id, content):
 
 
 def delete_post(post_id, user_id):
-    """自分の投稿だけ削除（論理削除）
-
-    【論理削除】
+    """自分の投稿だけ削除
     実際に行を消す（DELETE）のではなく、deleted_at に「消した日時」を記録するだけ
     この場合、間違えて消してもデータ自体は残っているので復元可能
 
-    【user_id も条件に入れている理由】
+    user_id も条件に入れている理由
     「そのIDの投稿」かつ「自分が投稿したもの」の両方が一致したときだけ更新
     　他人の投稿は消せないようにサーバー側でも判定
     """
