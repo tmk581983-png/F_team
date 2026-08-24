@@ -22,7 +22,10 @@ def login():
 
         #入力されたlogin_idのユーザーを探す
         with connection.cursor() as cursor:
-            cursor.execute("SELECT id, login_id, password FROM users WHERE login_id = %s", (login_id,))
+            cursor.execute(
+                "SELECT id, login_id, password FROM users WHERE login_id = %s AND deleted_at IS NULL",
+                (login_id,))
+            
             user = cursor.fetchone()
 
         #DBとの接続を閉じる
