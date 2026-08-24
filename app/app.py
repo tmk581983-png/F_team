@@ -12,6 +12,9 @@ app = Flask(__name__)
 
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
+# 投稿画像のアップロード上限（3MB）
+app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
+
 # Blueprint登録
 app.register_blueprint(login_bp)
 app.register_blueprint(signup_bp)

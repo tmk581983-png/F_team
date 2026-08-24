@@ -182,6 +182,7 @@ def get_posts_view_data(user_id, room_id):
                         posts.user_id,
                         posts.room_id,
                         posts.content,
+                        posts.image_path,
                         posts.created_at,
                         users.name AS user_name
                     FROM posts
@@ -380,17 +381,18 @@ def get_posts_by_room(room_id):
         conn.close()
 
 
-def create_post(user_id, room_id, content):
+def create_post(user_id, room_id, content, image_path=None):
     # 投稿をpostsテーブルに保存
+    # image_path：添付画像のファイル名（無ければNone）
     conn = get_connection()
     try:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO posts (user_id, room_id, content)
-                VALUES (%s, %s, %s)
+                INSERT INTO posts (user_id, room_id, content, image_path)
+                VALUES (%s, %s, %s, %s)
                 """,
-                (user_id, room_id, content),
+                (user_id, room_id, content, image_path),
             )
         #INSERTやUPDATEは、commit()しないと保存されない
         conn.commit()
@@ -423,19 +425,32 @@ def delete_post(post_id, user_id):
         conn.close()
 
 
-def update_post(post_id, user_id, content):
-    # 自分の投稿だけを編集
+def update_post(post_id, user_id, content, image_path=None):
+    """自分の投稿だけを編集
+    image_path：新しく画像が送られてきたときだけ渡される。
+    Noneのときは画像を変更しない（既存の画像をそのまま残す）
+    """
     conn = get_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute(
-                """
-                UPDATE posts
-                SET content = %s
-                WHERE id = %s AND user_id = %s
-                """,
-                (content, post_id, user_id),
-            )
+            if image_path is not None:
+                cur.execute(
+                    """
+                    UPDATE posts
+                    SET content = %s, image_path = %s
+                    WHERE id = %s AND user_id = %s
+                    """,
+                    (content, image_path, post_id, user_id),
+                )
+            else:
+                cur.execute(
+                    """
+                    UPDATE posts
+                    SET content = %s
+                    WHERE id = %s AND user_id = %s
+                    """,
+                    (content, post_id, user_id),
+                )
         conn.commit()
     finally:
         conn.close()
