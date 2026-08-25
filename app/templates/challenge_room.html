@@ -11,36 +11,35 @@
       <div class="challenge_card">
         <div class="challenge_header">
           <h2>{{ room_name }}</h2>   
-          <a href="{{ url_for('mypage.index')}}" class="back-btn" id="back-button">戻る</a>
+          <a href="{{ url_for('mypage.index')}}" class="back-btn" id="back-button">マイページへ戻る</a>
         </div>
         <p class="challenge_header">参加者 : {{ users|length}}名</p>
         <div class="set-timebox">
           <div class="set-time" id="setTime">00:00<span>/10:00</span></div>
             <div class="post_lists">
               {% for user in users %}
-                <div class="post_list">
-                  
-                  <span class="user-name">{{ user.name }}</span>
-                  <span class="user-content">
-                  {% if user.content %}
-                    {{ user.content }}
-                  {% else %}
-                    投稿データなし
-                  {% endif %}
-                  </span>
-                </div>
+                {% if user.content %} 
+                  <div class="post_list">
+                    
+                    <span class="user-name">{{ user.name }}</span>
+                    <span class="user-content">
+                    
+                      {{ user.content }}
+                    
+                
+                    </span>
+                  </div>
+                {% endif %}
               {% endfor %}
 
             </div>
 
-          <button class="time-btn" id="start">▶️ チャレンジ開始！</button>  
-          
         </div>
-
         <div class="result-box">
-          <a href="{{ url_for('post.posts_view')}}" class="result_report disabled" id="resultReport" >10分後、投稿可能</a>
+        <button class="time-btn"  id="start">▶️ チャレンジ開始！</button>  
+        <a href="{{ url_for('post.posts_view')}}" class="result_report disabled hidden" id="resultReport" >10分後、投稿可能</a>
         </div>
-        <!-- <p class="memo">※学習10分経過後、有効になります</p> -->
+        <p class="memo">※10分間がんばりましょう!</p>
       </div>
     </main>
 
