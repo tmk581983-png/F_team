@@ -24,7 +24,7 @@
           <div class="profile-detail">
             <div class="profile-top">
               <p>{{ user.name }}</p>
-              <button type="button" id="openButton">アカウント管理</button>
+              <button type="button" id="openButton" class="account-button">アカウント管理</button>
             </div>
 
             <div class="profile-bottom">
@@ -35,6 +35,28 @@
               {% for day in activity_data %}
                 <div class="activity-cell {{ day.status }}" title="{{ day.date }}"></div>
               {% endfor %}
+            </div>
+
+            <div class="activity-legend">
+              <div class="legend-item">
+                <span class="activity-cell none"></span>
+                <span>投稿なし</span>
+              </div>
+
+              <div class="legend-item">
+                <span class="activity-cell streak-1"></span>
+                <span>1日目</span>
+              </div>
+
+              <div class="legend-item">
+                <span class="activity-cell streak-2"></span>
+                <span>2日目</span>
+              </div>
+
+              <div class="legend-item">
+                <span class="activity-cell streak-3"></span>
+                <span>3日目</span>
+              </div>
             </div>
           </div>
         </div>
@@ -71,4 +93,45 @@
       {% endif %}
     </div>
   </div>
+
+  <dialog id="accountDialog" class="account-dialog">
+    <h3 class="account-dialog-title">アカウント管理</h3>
+
+    <h4 class="account-dialog-label">名前変更</h4>
+
+    <form class="account-form" method="POST" action="{{ url_for('mypage.update_account') }}">
+      <input
+        type="text"
+        id="user_name"
+        name="name"
+        placeholder="名前@◯期生"
+        required
+      >
+
+      <div class="dialog-button">
+        <button type="button" id="closeButton" class="close-button">閉じる</button>
+        <button type="submit" id="saveButton" class="save-button">保存</button>
+      </div>
+    </form>
+
+    <button type="button" id="openDeleteButton" class="delete-button">退会する</button>
+  </dialog>
+
+  <dialog id="deleteDialog" class="delete-dialog">
+    <h3 class="delete-dialog-title">退会しますか？</h3>
+
+    <p class="delete-dialog-message">
+      アカウントを退会すると、ログインできなくなります。<br>
+      この操作は取り消せません。
+    </p>
+
+    <form method="POST" action="{{ url_for('mypage.delete_account') }}">
+      <div class="delete-dialog-button">
+        <button type="button" id="cancelDeleteButton" class="delete-cancel-button">キャンセル</button>
+        <button type="submit" class="delete-confirm-button">退会する</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="{{ url_for('static', filename='js/mypage.js') }}"></script>
 {% endblock %}
