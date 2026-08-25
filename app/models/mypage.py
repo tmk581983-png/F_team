@@ -3,7 +3,7 @@
 from utils.db import get_connection
 
 
-def get_mypage_user(user_id):
+def get_user(user_id):
     """ユーザー情報を取得する"""
     connection = get_connection()
     try:
@@ -24,7 +24,7 @@ def get_mypage_user(user_id):
         connection.close()
 
 
-def update_mypage_user(user_id, name):
+def update_user(user_id, name):
     """ユーザー情報を更新する"""
     connection = get_connection()
     try:
@@ -40,6 +40,33 @@ def update_mypage_user(user_id, name):
             )
 
             connection.commit()
+
+    finally:
+        connection.close()
+
+
+def delete_user(user_id):
+    """ユーザーを退会状態にする"""
+    connection = get_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE users
+                SET name = '退会ユーザー',
+                    deleted_at = CURRENT_TIMESTAMP,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+                """,
+                (user_id,),
+            )
+
+            connection.commit()
+
+    except Exception:
+        connection.rollback()
+        raise
 
     finally:
         connection.close()
@@ -109,6 +136,10 @@ def get_joined_room(user_id):
                 JOIN room_participations AS mc
                     ON rp.room_id = mc.room_id
                     AND mc.graduated_at IS NULL
+                # 退会ユーザーを参加人数から除外
+                JOIN users AS u
+                    ON mc.user_id = u.id
+                    AND u.deleted_at IS NULL
                 WHERE rp.user_id = %s
                     AND rp.graduated_at IS NULL
                 # COUNT()で参加人数を集計するため、SELECTした項目をGROUP BY
