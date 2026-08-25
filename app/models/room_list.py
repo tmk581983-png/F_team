@@ -13,11 +13,15 @@ def get_room_lists():
                 SELECT
                     r.id,
                     r.name,
-                    COUNT(rp.user_id) AS member_count
+                    COUNT(u.id) AS member_count
                 FROM rooms AS r
                 LEFT JOIN room_participations AS rp
                     ON r.id = rp.room_id
                     AND rp.graduated_at IS NULL
+                # 退会ユーザーを参加人数から除外
+                LEFT JOIN users AS u
+                    ON rp.user_id = u.id
+                    AND u.deleted_at IS NULL
                 GROUP BY
                     r.id,
                     r.name
