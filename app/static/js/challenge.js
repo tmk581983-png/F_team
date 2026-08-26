@@ -12,7 +12,12 @@ start.addEventListener('click',() => {
   countUp();
   backbutton.style.pointerEvents = "none";
   start.style.pointerEvents = "none";
+  start.classList.add("time-btn-2","blink")
+  start.textContent="学習中・・・"
+  
 })
+
+
 
 // カウントアップタイマーの設定
 function countUp() {
@@ -28,13 +33,22 @@ function countUp() {
 
   // タイマー設定：10分は600000、テストは5000　単位はミリ秒
   const resultReport = document.getElementById("resultReport");
+  const memo = document.getElementsByClassName("memo")
 
-  if (studytime >= 5000) {
-      resultReport.classList.remove("disabled");
-      resultReport.textContent="チャレンジ達成!!"
+  if (studytime >= 10000) {
+      // テスト用 強制的に10分表示
+      setTime.textContent = `10:00/10:00`;
+      resultReport.classList.remove("disabled","hidden" );
+      resultReport.textContent="✔︎ 達成！結果を投稿する";
+      start.classList.add("hidden");
+      setTime.classList.add("set-time-complete");
+      memo[0].textContent="10分間お疲れさまでした!"
+      return;
   }
 // 画面更新のたびにcountUpを実行してという指示
   requestAnimationFrame(countUp);
+
+  
 
 }
 

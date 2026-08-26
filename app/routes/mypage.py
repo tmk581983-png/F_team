@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, session, request, redirect, url_for
 from models.mypage import (
-    get_mypage_user,
-    update_mypage_user,
+    get_user,
+    update_user,
+    delete_user,
     get_achievement_count,
     get_posted_days,
     get_joined_room,
@@ -19,7 +20,7 @@ def index():
     if user_id is None:
         return redirect(url_for("login.login"))
 
-    user = get_mypage_user(user_id)
+    user = get_user(user_id)
     achievement_data = get_achievement_count(user_id)
     posted_days = get_posted_days(user_id)
     activity_data = create_activity_data(posted_days)
@@ -35,18 +36,37 @@ def index():
 
 
 @mypage_bp.route("/update", methods=["POST"])
-def update():
+def update_account():
     """プロフィール情報を更新する"""
     user_id = session.get("user_id")
 
     if user_id is None:
         return redirect(url_for("login.login"))
 
-    name = request.form["name"]
+    # 名前が未入力または空白のみの場合は更新処理を行わないように制御
+    name = request.form["name"].strip()
 
-    update_mypage_user(user_id, name)
+    if not name:
+        return redirect(url_for("mypage.index"))
+
+    update_user(user_id, name)
 
     return redirect(url_for("mypage.index"))
+
+
+@mypage_bp.route("/delete", methods=["POST"])
+def delete_account():
+    """アカウントを退会する"""
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        return redirect(url_for("login.login"))
+
+    delete_user(user_id)
+
+    session.clear()
+
+    return redirect(url_for("login.login"))
 
 
 @mypage_bp.route("/logout", methods=["POST"])
