@@ -250,7 +250,7 @@
     <div class="graduation-dialog-body">
       <p class="graduation-title">チャレンジルーム卒業です！</p>
       <p class="graduation-message">
-        🎊<span class="graduation-highlight">おめでとうございます！</span> 🎉<br>
+        <span class="graduation-cracker">🎊</span><span class="graduation-highlight">おめでとうございます！</span> <span class="graduation-cracker">🎉</span><br>
         3日連続で投稿を達成しました。<br>
         マイページから新しいチャレンジルームを登録してください。
       </p>
@@ -283,7 +283,11 @@
 <script>
   // ブラウザの「戻る」操作を無効化する
   // 履歴に今のページを積み増しておき、戻ろうとしても同じページに留まらせる
-  history.pushState(null, '', location.href);
+  // 1つだけだと、連打した時にブラウザ側の処理がJavaScriptの復元より
+  // 速く進んでしまい、すり抜けることがあるため、複数積んでおく
+  for (let i = 0; i < 5; i++) {
+    history.pushState(null, '', location.href);
+  }
   window.addEventListener('popstate', () => {
     history.pushState(null, '', location.href);
   });
