@@ -281,6 +281,22 @@
 </dialog>
 
 <script>
+  // ブラウザの「戻る」操作を無効化する
+  // 履歴に今のページを積み増しておき、戻ろうとしても同じページに留まらせる
+  history.pushState(null, '', location.href);
+  window.addEventListener('popstate', () => {
+    history.pushState(null, '', location.href);
+  });
+
+  // 複数回「戻る」を押すと、ブラウザのキャッシュ(bfcache)から
+  // 別の古いページがそのまま復元され、popstateだけでは防ぎきれないことがある。
+  // pageshowイベント（キャッシュ復元時にも発生する）でも同じガードをかけ直す
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+      history.pushState(null, '', location.href);
+    }
+  });
+
   // ページを開いた直後、保存しておいたスクロール位置があれば元に戻す
   const savedScroll = sessionStorage.getItem('postsScrollY');
   if (savedScroll !== null) {
