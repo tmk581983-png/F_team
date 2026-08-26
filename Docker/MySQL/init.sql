@@ -18,17 +18,16 @@ CREATE TABLE rooms (
 
 INSERT INTO rooms(name)
 VALUES
-  ('ルーム1'),
-  ('ルーム2'),
-  ('ルーム3'),
-  ('ルーム4'),
-  ('ルーム5');
+  ('目指せ！150ステップクリア！'),
+  ('言語化してみる'),
+  ('Linuxコマンド乱れ打ち'),
+  ('今から日報書きます'),
+  ('なんだかやる気が出ない');
 
 CREATE TABLE room_participations (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   user_id BIGINT UNSIGNED NOT NULL,
   room_id BIGINT UNSIGNED NOT NULL,
-  challenged_at DATETIME,
   last_posted_at DATETIME,
   current_streak_days SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   graduated_at DATETIME,

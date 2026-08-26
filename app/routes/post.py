@@ -18,7 +18,7 @@ postsテーブルへDB接続
 import os
 import uuid
 
-from flask import Blueprint, render_template, request, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, current_app, session
 
 from models.post import (
     get_posts_view_data,
@@ -37,11 +37,6 @@ from models.post import (
 # Blueprintをインポート
 # ============================================================
 post_bp = Blueprint("post", __name__)
-
-# ログイン機能が未実装のため、仮のログインID。
-# session["user_id"] が使えるようになったら、この行ごと削除して
-# session.get("user_id") に置きかえる
-CURRENT_USER_ID = 1
 
 # リアクションの種類
 REACTION_TYPES = [
@@ -166,7 +161,11 @@ def to_view_posts(user_id, rows, reactions, replies):
 @post_bp.route("/posts", methods=["GET"])
 def posts_view():
     #ブラウザで/postsを開いたとき（GET）に投稿ページを表示
-    user_id = CURRENT_USER_ID
+
+    # ログインしていなければログイン画面へ
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("login.login"))
 
     # どのルームを見たいのか、指定があれば先に受け取る
     # アドレスの「?room_id=1」の部分を読み取り
@@ -236,7 +235,11 @@ def create_post():
     2. DBのpostsテーブルに保存
     3. 投稿画面に戻る
     """
-    user_id = CURRENT_USER_ID
+
+    # ログインしていなければログイン画面へ
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("login.login"))
 
     # request.formは「フォームから送られてきた値」を受け取る
     # どのルームへの投稿かは、HTMLのhidden項目
@@ -277,7 +280,11 @@ def delete_post(post_id):
     ※ 自分の投稿でなければ、models側のWHERE条件に一致しないため、
        何も削除されずに終わる。アドレスを直接打たれても安全。
     """
-    user_id = CURRENT_USER_ID
+
+    # ログインしていなければログイン画面へ
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("login.login"))
 
     # どのルームか受け取る（戻り先の画面を決めるため）
     room_id = request.form.get("room_id", type=int)
@@ -295,7 +302,11 @@ def edit_post(post_id):
     2. DB側で「自分の投稿かどうか」を確認しつつ書きかえる（models/post.py内）
     3. 投稿画面に戻る（編集フォームは閉じる）
     """
-    user_id = CURRENT_USER_ID
+
+    # ログインしていなければログイン画面へ
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("login.login"))
 
     # どのルームか（戻り先）
     room_id = request.form.get("room_id", type=int)
@@ -321,7 +332,10 @@ def react(post_id):
     自分の投稿には押せない、という確認はmodels側で行っている
     リアクションは、登録していないチャレンジルームでも可能。
     """
-    user_id = CURRENT_USER_ID
+    # ログインしていなければログイン画面へ
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("login.login"))
 
     room_id = request.form.get("room_id", type=int)
     reaction_type = request.form.get("reaction_type", type=int)
@@ -338,7 +352,11 @@ def react(post_id):
 @post_bp.route("/posts/<int:post_id>/reply", methods=["POST"])
 def reply_post(post_id):
     # 返信ボタンが押されたとき（POST）の処理
-    user_id = CURRENT_USER_ID
+
+    # ログインしていなければログイン画面へ
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("login.login"))
 
     room_id = request.form.get("room_id", type=int)
     content = request.form.get("content", "").strip()

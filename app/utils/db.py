@@ -15,6 +15,10 @@ _pool = Pool(
     autocommit=True,
     min_size=2,
     max_size=5,
+    # プール確認前に接続が生きているか確認する（切れていたら自動で新しい接続を作り直し）
+    # この確認をしないと長時間使われず、MySQL側からタイムアウト切断された接続がそのまま渡されて
+    # InterfaceErrorになることがある
+    ping_check=True,
 )
 _pool.init()
 
