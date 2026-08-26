@@ -19,10 +19,10 @@ CREATE TABLE rooms (
 INSERT INTO rooms(name)
 VALUES
   ('目指せ！150ステップクリア！'),
-  ('言語化してみる'),
-  ('Linuxコマンド乱れ打ち'),
-  ('今から日報書きます'),
-  ('なんだかやる気が出ない');
+  ('Linuxコマンド乱れ打ち！'),
+  ('ネットワークを理解しよう！'),
+  ('言語化してみよう！'),
+  ('休み処（今から日報書きます...✍）');
 
 CREATE TABLE room_participations (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
