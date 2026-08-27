@@ -35,9 +35,9 @@ function countUp() {
   const resultReport = document.getElementById("resultReport");
   const memo = document.getElementsByClassName("memo")
 
-  if (studytime >= 10000) {
+  if (studytime >= 600000) {
       // テスト用 強制的に10分表示
-      setTime.textContent = `10:00/10:00`;
+      // setTime.textContent = `10:00/10:00`;
       resultReport.classList.remove("disabled","hidden" );
       resultReport.textContent="✔︎ 達成！結果を投稿する";
       start.classList.add("hidden");
