@@ -25,7 +25,6 @@ main{
 
 .challenge_card{
   padding: var(--spacing);
-  /* background-color: var(--card-color); */
   border-radius: var(--radius);
 }
 
@@ -166,6 +165,7 @@ button:hover {
   flex: 1;
   min-width: 200px;
   text-align: left;
+  overflow-wrap: break-word;
 }
 
 
