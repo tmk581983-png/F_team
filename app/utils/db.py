@@ -39,6 +39,13 @@ def get_connection():
     """
     conn = _pool.get_conn()
 
+    # プール側のping_checkは「一定時間ごと」の確認のため、
+    # 確認した直後に切れるケースをすり抜けることがあった
+    # （InterfaceError: (0, '') が実際に発生）。
+    # ここで毎回明示的にping(reconnect=True)することで、
+    # 切れていればこの時点で自動的につなぎ直す
+    conn.ping(reconnect=True)
+
     def _release():
         try:
             conn.rollback()  # 未確定部分の破棄
