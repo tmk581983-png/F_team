@@ -153,6 +153,7 @@ body {
   font-size: 15px;
   line-height: 1.6;
   white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
 
 .post-image {
@@ -292,6 +293,7 @@ body {
 .reply-body {
   font-size: 13px;
   color: var(--text-muted);
+  overflow-wrap: break-word;
 }
 
 .reply-delete {
@@ -524,6 +526,21 @@ body {
 .graduation-highlight {
   color: var(--danger-color);
   font-weight: bold;
+}
+
+/* 卒業時ポップアップのクラッカー絵文字を左右に揺らす */
+.graduation-cracker {
+  display: inline-block;
+  animation: cracker-shake 0.5s ease-in-out infinite;
+}
+
+@keyframes cracker-shake {
+  0%, 100% {
+    transform: rotate(-15deg);
+  }
+  50% {
+    transform: rotate(15deg);
+  }
 }
 
 .graduation-secondary {
