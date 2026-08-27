@@ -25,8 +25,6 @@ def get_room_lists():
                 GROUP BY
                     r.id,
                     r.name
-                ORDER BY
-                    r.id
                 """,
             )
 
