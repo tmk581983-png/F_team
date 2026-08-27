@@ -9,6 +9,10 @@ a {
 }
 
 body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
   font-family: var(--font-family);
   color: var(--text-color);
   background-color: var(--bg-color);
@@ -17,7 +21,6 @@ body {
 .mypage {
   width: 100%;
   max-width: 672px;
-  margin: 152px auto;
   padding: 0 12px;
 }
 
@@ -25,18 +28,25 @@ body {
   display: flex;
   justify-content: flex-end;
   margin-right: 32px;
-  transform: translateY(28px);
+  transform: translateY(44px);
 }
 
 .logout-link {
-  color: var(--link-color);
-  background: none;
-  border: none;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--text-color);
+  background: var(--card-color);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 8px 16px;
   cursor: pointer;
 }
 
 .logout-link:hover {
-  text-decoration: underline;
+  color: var(--main-color);
+  background: rgb(238, 243, 242);
+  border: 1px solid var(--main-color);
 }
 
 .page-title {
@@ -200,14 +210,15 @@ body {
 }
 
 .account-dialog {
-  width: 348px;
+  width: 300px;
   background-color: var(--card-color);
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
   padding: 16px;
   position: fixed;
-  top: 20%;
-  left: 40%;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .account-dialog::backdrop {
@@ -265,14 +276,15 @@ body {
 }
 
 .delete-dialog {
-  width: 348px;
+  width: 300px;
   background-color: var(--card-color);
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
   padding: 16px;
   position: fixed;
-  top: 20%;
-  left: 40%;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .delete-dialog::backdrop {
@@ -348,16 +360,12 @@ body {
   }
 
   .account-dialog {
-    width: 240px;
+    width: 236px;
     font-size: 12px;
-    left: 50%;
-    transform: translateX(-50%);
   }
 
   .delete-dialog {
-    width: 240px;
+    width: 236px;
     font-size: 12px;
-    left: 50%;
-    transform: translateX(-50%);
   }
 }
