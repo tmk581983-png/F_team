@@ -10,29 +10,28 @@
   <div class="room-list">
     <h2 class="notice">参加したいルームを選んで入室してください</h2>
 
-    <div class="room-list-main">
-      <form method="POST" action="{{ url_for('room_list.register') }}">
-        <div class="room-selection">
-          {% for room in rooms %}
-            {# 選択したルームIDをPOSTで送るため、valueにはroom.idを設定 #}
-            <input
-              type="radio"
-              id="{{ room.id }}"
-              name="room_id"
-              value="{{ room.id }}"
-              required
-            >
-            <label for="{{ room.id }}" class="room-card">
-              <h4>{{ room.name }}</h4>
-              <p class="participant-count">参加者：{{ room.member_count }}名</p>
-            </label>
-          {% endfor %}
-        </div>
+    <form method="POST" action="{{ url_for('room_list.register') }}">
+      <div class="room-selection">
+        {% for room in rooms %}
+          {# 選択したルームIDをPOSTで送るため、valueにはroom.idを設定 #}
+          <input
+            type="radio"
+            id="{{ room.id }}"
+            name="room_id"
+            value="{{ room.id }}"
+            required
+          >
 
-        <div class="enter-room-container">
-          <button type="submit" class="enter-room-button">ルームに入室</button>
-        </div>
-      </form>
-    </div>
+          <label for="{{ room.id }}" class="room-card">
+            <h4>{{ room.name }}</h4>
+            <p class="participant-count">参加者：{{ room.member_count }}名</p>
+          </label>
+        {% endfor %}
+      </div>
+
+      <div class="enter-room-container">
+        <button type="submit" class="enter-room-button">ルームに入室</button>
+      </div>
+    </form>
   </div>
-{% endblock  %}
+{% endblock %}
