@@ -12,7 +12,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    margin: 152px auto 0;
 }
 
 /* カード　*/
