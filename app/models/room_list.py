@@ -25,6 +25,8 @@ def get_room_lists():
                 GROUP BY
                     r.id,
                     r.name
+                ORDER BY
+                    r.id
                 """,
             )
 
@@ -52,3 +54,4 @@ def create_room_participation(user_id, room_id):
 
     finally:
         connection.close()
+        
