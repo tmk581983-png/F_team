@@ -386,6 +386,8 @@ body {
   font-size: 15px;
   font-weight: bold;
   cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .btn-post:hover {
@@ -548,5 +550,10 @@ body {
   margin-top: 12px;
   font-size: 16px;
   color: var(--text-muted);
+  text-decoration: none;
+}
+
+.graduation-link-highlight {
+  color: #1a73e8;
   text-decoration: underline;
 }
