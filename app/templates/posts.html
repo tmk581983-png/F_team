@@ -1,0 +1,341 @@
+{# ============================================================
+   投稿画面
+   ============================================================ #}
+
+{# base.html（共通の外枠）を土台にする#}
+{% extends "base.html" %}
+
+{# ブラウザのタブに表示 #}
+{% block title %}投稿画面{% endblock %}
+
+{# このページだけで使う CSS を読み込む #}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/posts.css') }}">
+{% endblock %}
+
+{# ここから下が、ページの中身 #}
+{% block content %}
+<div class="post-page">
+
+  {# マイページへ戻る #}
+  <div class="post-nav">
+    {% if posted %}
+    <a class="back-link" href="{{ url_for('mypage.index') }}">マイページへ戻る</a>
+    {% else %}
+    {# 未投稿時はグレーアウト
+       <a> ではなく <span> にすることで、href が無くなり確実に押せなくなる
+       （<a> のまま色だけ薄くしても、クリックはできてしまう #}
+    <span class="back-link disabled">マイページへ戻る</span>
+    <span class="back-note">投稿すると押せるようになります</span>
+    {% endif %}
+  </div>
+
+  {# ============================================================
+     ルーム選択（モーダル表示）
+     ============================================================ #}
+  {# 現在選んでいるルーム名を表示するボタン（押すと一覧が開く） #}
+  <div class="room-select">
+    <label>閲覧したいチャレンジルームを選択</label>
+    <button type="button" class="room-select-current"
+            onclick="document.getElementById('room-dialog').showModal()">
+      {{ room_name }}
+      <span class="room-select-arrow">▼</span>
+    </button>
+  </div>
+
+  {# ルーム一覧（ふだんは非表示） #}
+  <dialog id="room-dialog" class="room-dialog">
+    <div class="room-dialog-header">
+      <h2>チャレンジルームを選ぶ</h2>
+      <button type="button" class="room-dialog-close"
+              onclick="document.getElementById('room-dialog').close()">✕</button>
+    </div>
+
+    <div class="room-dialog-list">
+      {% for room in rooms %}
+      {# 押すとそのルームの投稿画面に切り替わる #}
+      <form action="{{ url_for('post.posts_view') }}" method="get">
+        <input type="hidden" name="room_id" value="{{ room.id }}">
+        <button type="submit" class="room-card {% if room.id == room_id %}room-card-active{% endif %}">
+          {{ room.name }}
+        </button>
+      </form>
+      {% endfor %}
+    </div>
+  </dialog>
+
+
+  {# ============================================================
+     投稿画面
+     ============================================================ #}
+  <section class="board">
+    <h1 class="board-title">チャレンジルーム名</h1>
+
+    {# 選択中のルーム名を表示 #}
+    <p class="board-room">{{ room_name }}</p>
+
+    {# 投稿が1件あるかで、表示切り替え #}
+    {% if posts %}
+
+    {# posts（投稿リスト）を1件ずつ取り出して、順番に並べる #}
+    {% for post in posts %}
+    <article class="post">
+
+      {# 投稿者名と日時 #}
+      <div class="post-head">
+        <span class="post-user">{{ post.user_name }}</span>
+        <span class="post-time">{{ post.created_at }}</span>
+      </div>
+
+      {# 投稿の本文
+          「編集」を押した投稿だけ、本文の代わりに編集フォームを出す。
+           post.id == edit_id で編集中か判定 #}
+      {% if post.is_mine and post.id == edit_id %}
+      <form class="edit-form" action="{{ url_for('post.edit_post', post_id=post.id) }}" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="room_id" value="{{ room_id }}">
+        <textarea name="content" rows="3">{{ post.content }}</textarea>
+        {# 画像は任意添付（3MBまで）。選び直さなければ今の画像のまま #}
+        <input type="file" name="image" accept="image/*">
+        <div class="edit-form-footer">
+          {# キャンセル：edit_idを付けずに同じページへ戻る＝フォームを閉じる #}
+          <a class="action" href="{{ url_for('post.posts_view', room_id=room_id) }}">キャンセル</a>
+          <button type="submit" class="action action-save">保存する</button>
+        </div>
+      </form>
+      {% else %}
+      <p class="post-body">{{ post.content }}</p>
+      {% if post.image_path %}
+      <img class="post-image" src="{{ url_for('static', filename='uploads/' + post.image_path) }}" alt="投稿画像"
+           onclick="openImagePreview(this.src)">
+      {% endif %}
+      {% endif %}
+
+      {# ボタンの並び #}
+      <div class="post-actions">
+
+        {# ★ 自分の投稿には、リアクションできないようにする ★
+             自分の投稿 <span> にして押せなくする
+             他人の投稿 <form> で送信できるようにする #}
+        {% for r in post.reactions %}
+
+        {% if post.is_mine %}
+        {# 自分の投稿。件数は見えるが押せない #}
+        <span class="action disabled">{{ r.emoji }}  {{ r.count }}</span>
+
+        {% else %}
+        {# 他人の投稿 #}
+        <form class="reaction-form" action="{{ url_for('post.react', post_id=post.id) }}" method="post">
+
+          {# どのルームを見ているか、どの種類を押したか #}
+          <input type="hidden" name="room_id" value="{{ room_id }}">
+          <input type="hidden" name="reaction_type" value="{{ r.type }}">
+
+          {# 自分が押下後は色を変える #}
+          <button type="submit" class="action {% if r.active %}action-active{% endif %}">
+            {{ r.emoji }}  {{ r.count }}
+          </button>
+        </form>
+        {% endif %}
+
+        {% endfor %}
+
+        {# 返信は表示のみ（押しても何も起きない） #}
+        <button type="button" class="action">返信 {{ post.replies|length }}</button>
+
+        {# ★ 自分の投稿だけ、編集ボタンと削除ボタンを表示 ★
+             post.is_mineがTrueなら対象 #}
+        {% if post.is_mine %}
+
+        {# 「編集」を押すと、この投稿のedit_idを付けて再表示
+           すでに編集中（フォームを開いている）のときは、このボタンを隠す #}
+        {% if post.id != edit_id %}
+        <a class="action"
+           href="{{ url_for('post.posts_view', room_id=room_id, edit_id=post.id) }}">編集</a>
+        {% endif %}
+
+        <form action="{{ url_for('post.delete_post', post_id=post.id) }}" method="post">
+
+          {# どのルームの投稿か一緒に送る #}
+          <input type="hidden" name="room_id" value="{{ room_id }}">
+
+          {# onclickのconfirmは「本当に削除しますか？」の確認ダイアログ
+             キャンセルを押すと削除されない #}
+          <button type="submit" class="action action-delete" onclick="return confirm('この投稿を削除しますか？');">
+            削除
+          </button>
+        </form>
+        {% endif %}
+
+      </div>
+
+      {# 返信の一覧（返信があるときだけ表示）#}
+      {% if post.replies %}
+      <div class="replies">
+        {% for reply in post.replies %}
+        <div class="reply">
+          <p class="reply-body">
+            <span class="reply-user">{{ reply.user_name }}</span>：{{ reply.content }}
+          </p>
+          {# 自分の返信にだけ削除ボタンを表示。
+             サーバー側（delete_post）でも user_id を確認しているため、
+             他人の返信は削除できない #}
+          {% if reply.is_mine %}
+          <form action="{{ url_for('post.delete_post', post_id=reply.id) }}" method="post" class="reply-delete-form">
+            <input type="hidden" name="room_id" value="{{ room_id }}">
+            <button type="submit" class="reply-delete"
+                    onclick="return confirm('この返信を削除しますか？');">削除</button>
+          </form>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {# 返信フォーム（自分の投稿には表示しない。常に開いた状態）#}
+      {% if not post.is_mine %}
+      <form class="reply-form" action="{{ url_for('post.reply_post', post_id=post.id) }}" method="post">
+        <input type="hidden" name="room_id" value="{{ room_id }}">
+        <input type="text" name="content" placeholder="返信を書く" maxlength="255">
+        <button type="submit" class="reply-submit">送信</button>
+      </form>
+      {% endif %}
+
+    </article>
+    {% endfor %}
+
+    {# 投稿が1件も無かったときに表示 #}
+    {% else %}
+    <p class="empty">このルームにはまだ投稿がありません。</p>
+    {% endif %}
+
+  </section>
+
+
+  {# ============================================================
+     投稿フォーム
+     ============================================================ #}
+  {% if can_post %}
+  <section class="new-post">
+    <form class="new-post-form" action="{{ url_for('post.create_post') }}" method="post" enctype="multipart/form-data">
+
+      {# どのルームを見ているか一緒に送る。
+         type="hidden"なので画面に表示されない #}
+      <input type="hidden" name="room_id" value="{{ room_id }}">
+
+      {# name="content" が、Python 側で request.form.get("content") として
+         受け取るときの名前。投稿テンプレートの役目 #}
+      <textarea name="content" rows="3" placeholder="ステップ数や勉強時間、学んだ内容などを一言書いてみましょう"></textarea>
+
+      {# 画像は任意添付（3MBまで） #}
+      <input type="file" name="image" accept="image/*">
+
+      <div class="new-post-footer">
+        <button type="submit" class="btn-post">投稿</button>
+      </div>
+
+    </form>
+  </section>
+  {% else %}
+  <section class="new-post read-only">
+    <p>このルームは閲覧のみです。書き込みは、登録中のルームでのみ行えます。</p>
+  </section>
+  {% endif %}
+
+  {# ============================================================
+     卒業ポップアップ
+     3日連続を達成した投稿の後表示
+     ============================================================ #}
+  {% if just_graduated %}
+  <dialog id="graduation-dialog" class="graduation-dialog">
+    <div class="graduation-dialog-body">
+      <p class="graduation-title">チャレンジルーム卒業です！</p>
+      <p class="graduation-message">
+        <span class="graduation-cracker">🎊</span><span class="graduation-highlight">おめでとうございます！</span> <span class="graduation-cracker">🎉</span><br>
+        3日連続で投稿を達成しました。<br>
+        マイページから新しいチャレンジルームを登録してください。
+      </p>
+      <a class="btn-post" href="{{ url_for('mypage.index') }}">マイページへ</a>
+      <a class="graduation-secondary" href="{{ url_for('post.posts_view', room_id=room_id) }}">
+        投稿画面に戻るなら<span class="graduation-link-highlight">ここをクリック！</span><br>
+        （ただし投稿不可。返信、リアクションのみ可）
+      </a>
+    </div>
+  </dialog>
+  <script>
+    // ページを開いた瞬間に、モーダルとして開く
+    // open属性だけでは「背景を暗くする」「他の操作をブロックする」という動きにならないため、JavaScriptで開く。
+    const graduationDialog = document.getElementById('graduation-dialog');
+    graduationDialog.showModal();
+
+    // Escキーを押すと閉じられてしまうため、Esc無効化
+    graduationDialog.addEventListener('cancel', (event) => {
+      event.preventDefault();
+    });
+  </script>
+  {% endif %}
+
+<dialog id="image-preview-dialog" class="image-preview-dialog">
+  <button type="button" class="image-preview-close"
+          onclick="document.getElementById('image-preview-dialog').close()">✕</button>
+  <img id="image-preview-img" src="" alt="拡大画像">
+</dialog>
+
+<script>
+  // ブラウザの「戻る」操作を無効化する
+  // 履歴に今のページを積み増しておき、戻ろうとしても同じページに留まらせる
+  // 1つだけだと、連打した時にブラウザ側の処理がJavaScriptの復元より
+  // 速く進んでしまい、すり抜けることがあるため、複数積んでおく
+  for (let i = 0; i < 5; i++) {
+    history.pushState(null, '', location.href);
+  }
+  window.addEventListener('popstate', () => {
+    history.pushState(null, '', location.href);
+  });
+
+  // 複数回「戻る」を押すと、ブラウザのキャッシュ(bfcache)から
+  // 別の古いページがそのまま復元され、popstateだけでは防ぎきれないことがある。
+  // pageshowイベント（キャッシュ復元時にも発生する）でも同じガードをかけ直す
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+      history.pushState(null, '', location.href);
+    }
+  });
+
+  // ページを開いた直後、保存しておいたスクロール位置があれば元に戻す
+  const savedScroll = sessionStorage.getItem('postsScrollY');
+  if (savedScroll !== null) {
+    window.scrollTo(0, parseInt(savedScroll, 10));
+    sessionStorage.removeItem('postsScrollY');
+  }
+
+  // リアクションボタンを押した瞬間のスクロール位置を保存
+  document.querySelectorAll('.reaction-form').forEach((form) => {
+    form.addEventListener('submit', () => {
+      sessionStorage.setItem('postsScrollY', window.scrollY);
+    });
+  });
+
+// 投稿ボタンの連打防止（送信した瞬間は投稿ボタンを非活性化）
+document.querySelectorAll('.new-post-form').forEach((form) => {
+  form.addEventListener('submit', () => {
+    form.querySelector('button[type="submit"]').disabled = true;
+  });
+});
+
+// 投稿画像のプレビュー表示
+function openImagePreview(src) {
+  document.getElementById('image-preview-img').src = src;
+  document.getElementById('image-preview-dialog').showModal();
+}
+
+// 画像の外側（背景）をクリックしたら閉じる
+document.getElementById('image-preview-dialog').addEventListener('click', (event) => {
+  if (event.target.id === 'image-preview-dialog') {
+    event.target.close();
+  }
+});
+
+</script>
+
+</div>
+{% endblock %}

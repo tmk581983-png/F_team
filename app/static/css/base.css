@@ -1,0 +1,23 @@
+/* デザイン統一 */
+
+:root {
+  /* 色 */
+  --main-color: #2b8f67;        /* ボタンの色 */
+  --main-color-dark: #247a58;   /* ボタンにマウスを乗せたとき */
+  --link-color: #5c7fa6;        /* リンクの文字 */
+  --danger-color: #b5442f;      /* 削除ボタンの色 */
+  --text-color: #333333;        /* 文字 */
+  --text-muted: #8fa0a6;        /* 薄い文字 */
+  --bg-color: #f4f4f4;          /* 画面の背景 */
+  --card-color: #ffffff;        /* 白い箱の背景 */
+  --border-color: #cccccc;      /* 枠線 */
+
+  /* 文字 */
+  --font-family: sans-serif;
+  --font-size: 16px;
+
+  /* 形 */
+  --radius: 8px;                /* 箱の角丸 */
+  --radius-btn: 6px;            /* ボタンの角丸 */
+  --spacing: 16px;              /* 余白 */
+}

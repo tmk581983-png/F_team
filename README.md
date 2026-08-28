@@ -51,17 +51,20 @@ docker compose down
 │   ├── models/               # データベースモデル
 │   ├── templates/            # HTMLテンプレート
 │   ├── static/               # 静的ファイル
-│   │   ├── css/
-│   │   └── js/
+│   │   ├── css/              # CSSファイル
+│   │   ├── js/               # JavaScriptファイル
+│   │   ├── images/           # アプリで使用する画像
+│   │   └── uploads/          # ユーザーアップロードファイルの保存先
 │   └── utils/                # 共通処理
-│       └── DB.py
+│       └── db.py             # データベース接続処理
+├── docs/                     # 開発ドキュメント
 ├── Docker                    # Docker設定
 │   ├── Flask/                # Flaskコンテナ設定
-│   │   └── Dockerfile
+│   │   └── Dockerfile        # Flaskコンテナの設定ファイル
 │   └── MySQL/                # MySQLコンテナ設定
-│       ├── Dockerfile
-│       ├── init.sql
-│       └── my.cnf
+│       ├── Dockerfile        # MySQLコンテナの設定ファイル
+│       ├── init.sql          # データベースの初期設定
+│       └── my.cnf            # MySQLの設定ファイル
 ├── docker-compose.yml        # コンテナ構成設定
 ├── requirements.txt          # Pythonライブラリ一覧
 └── .env.example              # 環境変数設定例

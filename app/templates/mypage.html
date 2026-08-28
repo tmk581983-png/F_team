@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}マイページ | 三日坊主を極める{% endblock %}
+
+{% block page_css %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/mypage.css') }}">
+{% endblock %}
+
+{% block content %}
+  <div class="mypage">
+    <form class="logout-form" method="POST" action="{{ url_for('mypage.logout') }}">
+      <button type="submit" class="logout-link">ログアウト</button>
+    </form>
+
+    <h2 class="page-title">マイページ</h2>
+
+    <div class="card">
+      <div class="profile">
+        <div class="profile-image">
+          <img src="{{ url_for('static', filename='images/default_user.png') }}" alt="プロフィール画像">
+        </div>
+
+        <div class="profile-detail">
+          <div class="profile-top">
+            <p>{{ user.name }}</p>
+            <button type="button" id="openButton" class="account-button">アカウント管理</button>
+          </div>
+
+          <div class="profile-bottom">
+            <p>累計達成回数：{{ achievement_data.achievement_count }}回</p>
+          </div>
+
+          <div class="activity-calendar">
+            {% for day in activity_data %}
+              <div class="activity-cell {{ day.status }}" title="{{ day.date }}"></div>
+            {% endfor %}
+          </div>
+
+          <div class="activity-legend">
+            <div class="legend-item">
+              <span class="activity-cell none"></span>
+              <span>投稿なし</span>
+            </div>
+
+            <div class="legend-item">
+              <span class="activity-cell streak-1"></span>
+              <span>1日目</span>
+            </div>
+
+            <div class="legend-item">
+              <span class="activity-cell streak-2"></span>
+              <span>2日目</span>
+            </div>
+
+            <div class="legend-item">
+              <span class="activity-cell streak-3"></span>
+              <span>3日目</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="section-title">参加中のチャレンジルーム（上限は1つまで）</h3>
+
+    {% if joined_room %}
+      {# 参加中のルームを表示 #}
+      <div class="card">
+        <div class="room-detail">
+          <h4>{{ joined_room.name }}</h4>
+          <p class="participant-count">参加者：{{ joined_room.member_count }}名</p>
+        </div>
+      </div>
+      
+      <div class="room-button-container">
+        <a class="room-button" href="{{ url_for('challenge.room', room_id=joined_room.room_id) }}">【{{ joined_room.name }}】ルームに入室</a>
+      </div>
+    {% else %}
+      {# 参加中のルームがない場合のメッセージを表示 #}
+      <div class="card">
+        <div class="room-detail-empty">
+          <h4>
+            現在、参加中のルームはありません<br>
+            ルームを選んでチャレンジを始めましょう！
+          </h4>
+        </div>
+      </div>
+
+      <div class="room-button-container">
+        <a class="room-button" href="{{ url_for('room_list.index') }}">ルームを選ぶ</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <dialog id="accountDialog" class="account-dialog">
+    <h3 class="account-dialog-title">アカウント管理</h3>
+
+    <h4 class="account-dialog-label">名前変更</h4>
+
+    <form class="account-form" method="POST" action="{{ url_for('mypage.update_account') }}">
+      <input
+        type="text"
+        id="user_name"
+        name="name"
+        placeholder="名前@◯期生"
+        required
+      >
+
+      <div class="dialog-button">
+        <button type="button" id="closeButton" class="close-button">閉じる</button>
+        <button type="submit" id="saveButton" class="save-button">保存</button>
+      </div>
+    </form>
+
+    <button type="button" id="openDeleteButton" class="delete-button">退会する</button>
+  </dialog>
+
+  <dialog id="deleteDialog" class="delete-dialog">
+    <h3 class="delete-dialog-title">退会しますか？</h3>
+
+    <p class="delete-dialog-message">
+      アカウントを退会すると、ログインできなくなります。<br>
+      この操作は取り消せません。
+    </p>
+
+    <form method="POST" action="{{ url_for('mypage.delete_account') }}">
+      <div class="delete-dialog-button">
+        <button type="button" id="cancelDeleteButton" class="delete-cancel-button">キャンセル</button>
+        <button type="submit" class="delete-confirm-button">退会する</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="{{ url_for('static', filename='js/mypage.js') }}"></script>
+{% endblock %}

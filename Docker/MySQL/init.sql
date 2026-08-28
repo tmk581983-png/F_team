@@ -1,0 +1,65 @@
+USE app;
+
+CREATE TABLE users (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  login_id VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  achievement_count INT UNSIGNED NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME 
+);
+
+CREATE TABLE rooms (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(20) NOT NULL UNIQUE
+);
+
+INSERT INTO rooms(name)
+VALUES
+  ('目指せ！150ステップクリア！'),
+  ('Linuxコマンド乱れ打ち！'),
+  ('ネットワークを理解しよう！'),
+  ('言語化してみよう！'),
+  ('休み処（今から日報書きます...✍）');
+
+CREATE TABLE room_participations (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  room_id BIGINT UNSIGNED NOT NULL,
+  last_posted_at DATETIME,
+  current_streak_days SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  graduated_at DATETIME,
+
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (room_id) REFERENCES rooms(id)
+);
+
+CREATE TABLE posts (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  room_id BIGINT UNSIGNED NOT NULL,
+  parent_post_id BIGINT UNSIGNED,  -- 投稿画面の返信用に追加
+  content VARCHAR(255) NOT NULL,
+  image_path VARCHAR(255),  -- 添付画像のファイル名（任意）
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME,
+
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (room_id) REFERENCES rooms(id),
+  FOREIGN KEY (parent_post_id) REFERENCES posts(id)  -- 投稿画面の返信用に追加
+);
+
+CREATE TABLE reactions (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  post_id BIGINT UNSIGNED NOT NULL,
+  reaction_type TINYINT UNSIGNED NOT NULL,
+
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (post_id) REFERENCES posts(id),
+
+  UNIQUE(user_id, post_id, reaction_type)
+);
